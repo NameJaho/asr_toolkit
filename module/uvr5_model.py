@@ -1,9 +1,9 @@
-from my_utils import *
+from tools.my_utils import *
 from module.uvr5.mdxnet import MDXNetDereverb
 from module.uvr5.vr import AudioPre, AudioPreDeEcho
 import ffmpeg
 import traceback
-from device_selector import *
+from tools.device_selector import *
 
 
 # DeEcho-Aggressive by default

@@ -1,6 +1,6 @@
-import audio_extractor
+from tools import audio_extractor
 from module.uvr5_model import VocalSeparator
-from my_utils import *
+from tools.my_utils import *
 from loguru import logger
 import os
 
