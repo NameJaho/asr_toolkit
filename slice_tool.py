@@ -1,6 +1,6 @@
 import librosa  # Optional. Use any library you like to read audio files.
 import soundfile
-from service.slicer import Slicer
+from module.slicer import Slicer
 import os
 
 

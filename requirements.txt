@@ -2,3 +2,4 @@ numpy
 funasr
 librosa
 soundfile
+loguru
