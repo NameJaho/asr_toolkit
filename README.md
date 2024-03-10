@@ -17,7 +17,7 @@
    ```
 2. Clone the repo
    ```sh
-   git clone https://github.com/Jeru2023/ai_twins.git
+   git clone git@github.com:Jeru2023/asr_toolkit.git
    ```
 3. Install packages
    ```sh
