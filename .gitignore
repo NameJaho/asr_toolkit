@@ -4,4 +4,4 @@ __pycache__
 .DS_Store
 output
 local
-pretrained_models
+models

@@ -3,3 +3,4 @@ funasr
 librosa
 soundfile
 loguru
+torch
