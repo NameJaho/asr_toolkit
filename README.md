@@ -31,8 +31,11 @@
 <li>1. 保留人声：不带和声的音频选这个，对主人声保留比HP5更好。内置HP2和HP3两个模型，HP3可能轻微漏伴奏但对主人声保留比HP2稍微好一丁点； </li>
 <li>2. 仅保留主人声：带和声的音频选这个，对主人声可能有削弱。内置HP5一个模型； </li>
 <li>3. 去混响、去延迟模型（by FoxJoy）：</li>
-   (1)MDX-Net(onnx_dereverb):对于双通道混响是最好的选择，不能去除单通道混响；<br>
-   (234)DeEcho:去除延迟效果。Aggressive比Normal去除得更彻底，DeReverb额外去除混响，可去除单声道混响，但是对高频重的板式混响去不干净。<br><br>
+   <ul>
+   <li>(1)MDX-Net(onnx_dereverb):对于双通道混响是最好的选择，不能去除单通道混响；</li>
+   <li>(234)DeEcho:去除延迟效果。Aggressive比Normal去除得更彻底，DeReverb额外去除混响，可去除单声道混响，但是对高频重的板式混响去不干净。</li>
+   </ul>
+<br>
 
 附：<br>
 1. DeEcho-DeReverb模型的耗时是另外2个DeEcho模型的接近2倍；<br>
