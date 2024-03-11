@@ -3,6 +3,7 @@ from module.uvr5_model import VocalSeparator
 from module.asr_model import ASRModel
 from tools.my_utils import *
 from loguru import logger
+from tools.my_utils import timer
 import os
 
 INPUT_VIDEOS_FOLDER = 'data'
@@ -16,6 +17,7 @@ class Executor:
         self.asr_model = ASRModel()
 
     @staticmethod
+    @timer
     def convert_videos(input_folder=INPUT_VIDEOS_FOLDER):
         input_paths = get_file_paths(input_folder)
 
@@ -32,11 +34,13 @@ class Executor:
                 audio_extractor.extract_audio(input_folder, output_file_path)
         logger.info('Videos to audios conversion completed...')
 
+    @timer
     def separate_vocals(self):
         logger.info('Vocals separation started...')
         self.vocal_separator.uvr()
         logger.info('Vocals separation completed...')
 
+    @timer
     def asr(self, input_folder=OUTPUT_AUDIOS_FOLDER, output_folder=OUTPUT_TEXTS_FOLDER):
         input_paths = get_file_paths(input_folder)
 
