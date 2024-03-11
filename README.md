@@ -59,6 +59,7 @@
 ## Performance
 系统会自动获取device信息决定是否启用GPU加速和半精度。<br>
 代码在CPU上也可以运行，ASR可以调整decoder-thread-num，io-thread-num来最大化利用CPU算力。<br>
+用Macbook Pro测试批处理两个视频，一个3分钟，一个2分15秒，总耗时29秒，其中28秒是ASR消耗。
 
 <!-- ROADMAP -->
 ## Roadmap
