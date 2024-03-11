@@ -27,8 +27,7 @@ class VocalSeparator:
         logs = []
         model_name = self.model_name
         file_paths = get_file_paths(self.input_path)
-        logger.debug(self.input_path)
-        logger.debug(self.vocals_path)
+
         if not os.path.exists(self.vocals_path):
             os.makedirs(self.vocals_path)
         if not os.path.exists(self.background_path):
@@ -84,7 +83,7 @@ class VocalSeparator:
 
                     cmd = "ffmpeg -i %s -vn -acodec pcm_s16le -ac 2 -ar 44100 %s -y" % (file_path, tmp_path)
                     os.system(cmd)
-                    
+
                     file_path = tmp_path
                 try:
                     if not done:

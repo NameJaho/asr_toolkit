@@ -63,5 +63,5 @@ class Executor:
 if __name__ == '__main__':
     executor = Executor()
     executor.convert_videos()
-    # executor.separate_vocals()
+    executor.separate_vocals()
     executor.asr()

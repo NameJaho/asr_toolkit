@@ -5,3 +5,4 @@ __pycache__
 output
 local
 models
+uvr5_weights
