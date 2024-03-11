@@ -55,4 +55,14 @@
 1. DeEcho-DeReverb模型的耗时是另外2个DeEcho模型的接近2倍；<br>
 2. MDX-Net-Dereverb模型挺慢的；<br>
 3. 个人推荐的最干净的配置是先MDX-Net再DeEcho-Aggressive。<br>
-                    
+
+## Performance
+系统会自动获取device信息决定是否启用GPU加速和半精度。<br>
+代码在CPU上也可以运行，ASR可以调整decoder-thread-num，io-thread-num来最大化利用CPU算力。<br>
+
+<!-- ROADMAP -->
+## Roadmap
+
+- [] multilingual - 新增ARS英文模型
+- [] 声纹识别 - 多人对话时区分角色
+- [] audio filter - 过滤掉无效音频内容(标题判断，人声判断，头部抽样)
