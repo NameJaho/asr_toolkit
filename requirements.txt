@@ -4,3 +4,6 @@ librosa
 soundfile
 loguru
 torch
+ffmpeg
+torchaudio
+modelscope
