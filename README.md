@@ -6,7 +6,7 @@
    
 2. Donwload Pretrain Models.
    
-   2.1 Downlaod Vocal Separation model [URV5](https://www.icloud.com.cn/iclouddrive/0bekRKDiJXboFhbfm3lM2fVbA#UVR5_Weights).
+   2.1 Downlaod Vocal Separation model [UVR5](https://www.icloud.com.cn/iclouddrive/0bekRKDiJXboFhbfm3lM2fVbA#UVR5_Weights).
 
 3. ASR model, VAD model, Punctuation model will be downloaded automatically.
 
@@ -24,6 +24,8 @@
    ```sh
    install -r requirements.txt
    ```
+4. Place the downloaded UVR5 model folder under "models" directory.
+   
 ## Usage
 可以在executor.py的顶部修改input/output folder的常量，也可以在调用executor的方法时传入参数。<br>
 默认情况下，视频文件的路径为'data', 最终文字的输出路径为'output/texts', 输出文件的文件名会与原始文件名保持一致，方便匹配。<br>
