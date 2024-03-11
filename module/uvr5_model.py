@@ -1,3 +1,5 @@
+import re
+
 from tools.my_utils import *
 from module.uvr5.mdxnet import MDXNetDereverb
 from module.uvr5.vr import AudioPre, AudioPreDeEcho
@@ -14,6 +16,7 @@ class VocalSeparator:
         self.input_path = os.path.join(self.root_path, "output", "audios")
         self.vocals_path = os.path.join(self.root_path, "output", "vocals")
         self.background_path = os.path.join(self.root_path, "output", "background")
+        self.reformat_path = os.path.join(self.root_path, "output", "reformat")
         self.model_name = "VR-DeEchoAggressive"
         self.device = get_infer_device()
         self.is_half = is_half(self.device)
@@ -24,12 +27,15 @@ class VocalSeparator:
         logs = []
         model_name = self.model_name
         file_paths = get_file_paths(self.input_path)
-        print(self.input_path)
-        print(self.vocals_path)
+        logger.debug(self.input_path)
+        logger.debug(self.vocals_path)
         if not os.path.exists(self.vocals_path):
             os.makedirs(self.vocals_path)
         if not os.path.exists(self.background_path):
             os.makedirs(self.background_path)
+
+        if not os.path.exists(self.reformat_path):
+            os.mkdir(self.reformat_path)
 
         try:
             is_hp3 = "HP3" in model_name
@@ -45,11 +51,15 @@ class VocalSeparator:
                 )
 
             for file_path in file_paths:
+                id_ = re.findall('audios/(.*?).wav', file_path)[0]
+                output_path = self.root_path + f'/output/vocals/vocal_{id_}.wav_10.wav'
+                logger.info(output_path)
                 reformat_required = True
                 done = False
 
                 # if vocal file already exists, skip
-                if os.path.exists(file_path):
+                if os.path.exists(output_path):
+                    logger.debug(f'[{id_}] => output file exists')
                     continue
 
                 try:
@@ -65,16 +75,14 @@ class VocalSeparator:
                         done = True
                 except:
                     reformat_required = True
-                    traceback.print_exc()
+                    logger.debug(traceback.print_exc())
                 if reformat_required:
-                    tmp_path = "%s/%s.reformatted.wav" % (
-                        os.path.join(os.environ["TEMP"]),
+                    tmp_path = "%s/%s" % (
+                        self.reformat_path,
                         os.path.basename(file_path),
                     )
-                    os.system(
-                        "ffmpeg -i %s -vn -acodec pcm_s16le -ac 2 -ar 44100 %s -y"
-                        % (file_path, tmp_path)
-                    )
+                    cmd = "ffmpeg -i %s -vn -acodec pcm_s16le -ac 2 -ar 44100 %s -y" % (file_path, tmp_path)
+                    os.system(cmd)
                     file_path = tmp_path
                 try:
                     if not done:
@@ -84,10 +92,12 @@ class VocalSeparator:
                     logs.append("%s->Success" % (os.path.basename(file_path)))
                     logger.debug("\n".join(logs))
                 except:
+                    logger.debug(traceback.print_exc())
+
                     logs.append(
                         "%s->%s" % (os.path.basename(file_path), traceback.format_exc())
                     )
-                    logger.debug("\n".join(logs))
+                    # logger.debug("\n".join(logs))
         except:
             logs.append(traceback.format_exc())
             logger.debug("\n".join(logs))
