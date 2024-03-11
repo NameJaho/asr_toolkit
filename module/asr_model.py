@@ -15,10 +15,14 @@ class ASRModel:
 
     @staticmethod
     def get_model():
-        model = AutoModel(model=ASR_MODEL_NAME, model_revision="v2.0.2",
+        model = AutoModel(model=ASR_MODEL_NAME, model_revision="v2.0.4",
                           vad_model=VAD_MODEL_NAME, vad_model_revision="v2.0.2",
-                          punc_model=PUNC_MODEL_NAME, punc_model_revision="v2.0.3",
+                          punc_model=PUNC_MODEL_NAME, punc_model_revision="v2.0.4",
                           )
+
+        # model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc-c",
+        #                   # spk_model="cam++",
+        #                   )
         return model
 
     # inference param: batch_size_token = 5000, batch_size_token_threshold_s = 40, max_single_segment_time = 6000
