@@ -63,6 +63,6 @@
 <!-- ROADMAP -->
 ## Roadmap
 
-- [] multilingual - 新增ARS英文模型
-- [] 声纹识别 - 多人对话时区分角色
-- [] audio filter - 过滤掉无效音频内容(标题判断，人声判断，头部抽样)
+- [ ] multilingual - 新增ARS英文模型
+- [ ] 声纹识别 - 多人对话时区分角色
+- [ ] audio filter - 过滤掉无效音频内容(标题判断，人声判断，头部抽样)
