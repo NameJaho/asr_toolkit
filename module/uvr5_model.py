@@ -81,8 +81,10 @@ class VocalSeparator:
                         self.reformat_path,
                         os.path.basename(file_path),
                     )
+
                     cmd = "ffmpeg -i %s -vn -acodec pcm_s16le -ac 2 -ar 44100 %s -y" % (file_path, tmp_path)
                     os.system(cmd)
+                    
                     file_path = tmp_path
                 try:
                     if not done:
@@ -94,10 +96,9 @@ class VocalSeparator:
                 except:
                     logger.debug(traceback.print_exc())
 
-                    logs.append(
-                        "%s->%s" % (os.path.basename(file_path), traceback.format_exc())
-                    )
+                    logs.append("%s->%s" % (os.path.basename(file_path), traceback.format_exc()))
                     # logger.debug("\n".join(logs))
+
         except:
             logs.append(traceback.format_exc())
             logger.debug("\n".join(logs))

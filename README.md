@@ -6,8 +6,9 @@
    
 2. Donwload Pretrain Models.
    
-   2.1 Downlaod Vocal Separation model [URV5](https://www.icloud.com.cn/iclouddrive/0bekRKDiJXboFhbfm3lM2fVbA#UVR5_Weights).
+   2.1 Downlaod Vocal Separation model [UVR5](https://www.icloud.com.cn/iclouddrive/0bekRKDiJXboFhbfm3lM2fVbA#UVR5_Weights).
 
+3. ASR model, VAD model, Punctuation model will be downloaded automatically.
 
 ### Installation
 1. Create independent Python Environment.
@@ -23,6 +24,21 @@
    ```sh
    install -r requirements.txt
    ```
+4. Place the downloaded UVR5 weights folder(uvr5_weights) under "models" directory.
+   
+## Usage
+可以在executor.py的顶部修改input/output folder的常量，也可以在调用executor的方法时传入参数。<br>
+默认情况下，视频文件的路径为'data', 最终文字的输出路径为'output/texts', 输出文件的文件名会与原始文件名保持一致，方便匹配。<br>
+
+```python
+   from executor import Executor
+
+   executor = Executor()
+   executor.convert_videos()
+   # 人声分离代码还在调试中
+   # executor.separate_vocals()
+   executor.asr()
+```
 
 ## Vocal Separation
 人声伴奏分离批量处理， 使用UVR5模型。 <br> 目前代码中默认使用的是DeEcho-Aggressive模型。
@@ -41,4 +57,16 @@
 1. DeEcho-DeReverb模型的耗时是另外2个DeEcho模型的接近2倍；<br>
 2. MDX-Net-Dereverb模型挺慢的；<br>
 3. 个人推荐的最干净的配置是先MDX-Net再DeEcho-Aggressive。<br>
-                    
+
+## Performance
+系统会自动获取device信息决定是否启用GPU加速和半精度。<br>
+代码在CPU上也可以运行，ASR可以调整decoder-thread-num，io-thread-num来最大化利用CPU算力。<br>
+用Macbook Pro测试批处理两个视频，一个3分钟，一个2分15秒，总耗时29秒，其中28秒是ASR消耗。
+
+<!-- ROADMAP -->
+## Roadmap
+
+- [ ] 人声分离(H) - 修复bug
+- [ ] multilingual(L) - 新增ARS英文模型
+- [ ] 声纹识别(L) - 多人对话时区分角色
+- [ ] audio filter(H) - 过滤掉无效音频内容(标题判断，人声判断，头部抽样)
