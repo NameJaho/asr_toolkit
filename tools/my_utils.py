@@ -120,3 +120,16 @@ def get_file_name(file_path):
 
     # 返回文件名，不要后缀
     return file_name
+
+
+def write_text_to_file(text, output_path):
+    """
+    将文本写入输出路径。
+
+    Args:
+        text (str): 要写入的文本。
+        output_path (str): 输出路径。
+    """
+
+    with open(output_path, "w") as f:
+        f.write(text)

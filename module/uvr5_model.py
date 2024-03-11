@@ -8,13 +8,13 @@ from tools.device_selector import *
 
 # DeEcho-Aggressive by default
 class VocalSeparator:
-    def __int__(self):
+    def __init__(self):
         self.root_path = get_root_path()
-        self.weight_uvr5_root = os.path.join(self.root_path, "models/uvr5/uvr5_weights")
+        self.weight_uvr5_root = os.path.join(self.root_path, "models/uvr5_weights")
         self.input_path = os.path.join(self.root_path, "output", "audios")
         self.vocals_path = os.path.join(self.root_path, "output", "vocals")
         self.background_path = os.path.join(self.root_path, "output", "background")
-        self.model_name = "DeEcho-Aggressive"
+        self.model_name = "VR-DeEchoAggressive"
         self.device = get_infer_device()
         self.is_half = is_half(self.device)
 
