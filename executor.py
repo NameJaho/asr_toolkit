@@ -1,5 +1,6 @@
 from tools import audio_extractor
-from module.uvr5_model import VocalSeparator
+#from module.uvr5_model import VocalSeparator
+from module.uvr3_model import VocalSeparator
 from tools.my_utils import *
 from loguru import logger
 import os
@@ -30,7 +31,8 @@ class Executor:
 
     def separate_vocals(self):
         logger.info('Vocals separation started...')
-        self.vocal_separator.uvr()
+        self.vocal_separator.test()
+
         logger.info('Vocals separation completed...')
 
 

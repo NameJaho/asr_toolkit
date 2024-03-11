@@ -82,15 +82,15 @@ class VocalSeparator:
                             file_path, self.background_path, self.vocals_path, output_format, is_hp3
                         )
                     logs.append("%s->Success" % (os.path.basename(file_path)))
-                    yield "\n".join(logs)
+                    logger.debug("\n".join(logs))
                 except:
                     logs.append(
                         "%s->%s" % (os.path.basename(file_path), traceback.format_exc())
                     )
-                    yield "\n".join(logs)
+                    logger.debug("\n".join(logs))
         except:
             logs.append(traceback.format_exc())
-            yield "\n".join(logs)
+            logger.debug("\n".join(logs))
         finally:
             try:
                 if model_name == "onnx_dereverb_By_FoxJoy":
@@ -104,4 +104,4 @@ class VocalSeparator:
             print("clean_empty_cache")
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
-        yield "\n".join(logs)
+        logger.debug("\n".join(logs))
