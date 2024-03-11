@@ -24,7 +24,7 @@
    ```sh
    install -r requirements.txt
    ```
-4. Place the downloaded UVR5 model folder under "models" directory.
+4. Place the downloaded UVR5 weights folder(uvr5_weights) under "models" directory.
    
 ## Usage
 可以在executor.py的顶部修改input/output folder的常量，也可以在调用executor的方法时传入参数。<br>
