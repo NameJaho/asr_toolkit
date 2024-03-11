@@ -34,9 +34,10 @@
    from executor import Executor
 
    executor = Executor()
+
    executor.convert_videos()
-   # 人声分离代码还在调试中
-   # executor.separate_vocals()
+   # 如何不需要人声分离可以注释下一行代码
+   executor.separate_vocals()
    executor.asr()
 ```
 
@@ -63,10 +64,13 @@
 代码在CPU上也可以运行，ASR可以调整decoder-thread-num，io-thread-num来最大化利用CPU算力。<br>
 用Macbook Pro测试批处理两个视频，一个3分钟，一个2分15秒，总耗时29秒，其中28秒是ASR消耗。
 
+人声分离功能已集成，这也是个比较耗时的操作，正在尝试快速检测是否需要人声分离。
+
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] 人声分离(H) - 修复bug
+- [*] 人声分离(H) - 修复bug
+- [ ] Auto Detection(M) - 自动判断是否应该做人声分离
 - [ ] multilingual(L) - 新增ARS英文模型
 - [ ] 声纹识别(L) - 多人对话时区分角色
 - [ ] audio filter(H) - 过滤掉无效音频内容(标题判断，人声判断，头部抽样)
