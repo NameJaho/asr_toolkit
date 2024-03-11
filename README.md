@@ -26,7 +26,7 @@
    ```
 ## Usage
 可以在executor.py的顶部修改input/output folder的常量，也可以在调用executor的方法时传入参数。<br>
-默认情况下，视频文件的路径为'data', 最终文字的输出路径为'output', 输出文件的文件名会与原始文件名保持一致，方便匹配。<br>
+默认情况下，视频文件的路径为'data', 最终文字的输出路径为'output/texts', 输出文件的文件名会与原始文件名保持一致，方便匹配。<br>
 
 ```python
    from executor import Executor
