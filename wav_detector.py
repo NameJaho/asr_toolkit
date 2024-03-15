@@ -7,25 +7,34 @@ import os
 
 VAD_MODEL_NAME = "speech_fsmn_vad_zh-cn-16k-common-pytorch"
 
+# Define all major scales to be used later for finding key signature
+# Arrays all in the format:  [C, C#, D, Eb, E, F, F#, G, Ab, A, Bb, B]
+major_scales = {'C': [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1],
+                'C#': [1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0],
+                'D': [0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
+                'Eb': [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0],
+                'E': [0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1],
+                'F': [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0],
+                'F#': [0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
+                'G': [1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
+                'Ab': [1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0],
+                'A': [0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1],
+                'Bb': [1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0],
+                'B': [0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1]}
+
 
 class WavDetector:
     def __init__(self, audio_path):
         self.audio_path = audio_path
         self.vad_model_path = os.path.join(utils.get_root_path(), "models", VAD_MODEL_NAME)
-
-    def load_audio(self):
-        y, sr = librosa.load(self.audio_path)
-        return y, sr
+        self.y, self.sr = librosa.load(self.audio_path)
 
     def calculate_mel_spec(self):
-        y, sr = self.load_audio()
-        mel_spec = librosa.feature.melspectrogram(y=y, sr=sr)
+        mel_spec = librosa.feature.melspectrogram(y=self.y, sr=self.sr)
         return mel_spec
 
     def get_audio_length(self):
-        y, sr = self.load_audio()
-        #y, sr = librosa.load(self.audio_path, sr=None)
-        length_in_seconds = librosa.get_duration(y, sr)
+        length_in_seconds = librosa.get_duration(self.y, self.sr)
         return length_in_seconds
 
     def check_vocal(self):
@@ -43,8 +52,52 @@ class WavDetector:
 
         return gaps, vocal_pct
 
+    def get_tempo_gram(self):
+        """
+        The tempo gram visualizes the rhythm (pattern recurrence), using the
+        onset envelope, oenv, to determine the start points for the patterns.
+        """
+        oenv = librosa.onset.onset_strength(y=self.y, sr=self.sr, hop_length=512)
+        tempo_gram = librosa.feature.tempogram(onset_envelope=oenv, sr=self.sr, hop_length=512)
+        return tempo_gram
+
+    def find_tonic_and_key(self):
+        """
+        The tonic is the base note in the key signature, e.g. c is the tonic for
+        the key of c major.  The tonic can be found by summing the chromagram
+        arrays and finding the index of the array with the greatest sum.  The
+        logic is that the tonic is the note with the greatest presence.
+
+        If the tonic doesn't match the tonic of bestmatch, the highest
+        correlated major scale, then the key is a minor scale.
+        (Minor scales = Major scales but have different tonics)
+        """
+        chroma_gram = librosa.feature.chroma_stft(y=self.y, sr=self.sr)
+        chroma_sums = []
+        for i, a in enumerate(chroma_gram):
+            chroma_sums.append(np.sum(chroma_gram[i]))
+        tonic_val = np.where(max(chroma_sums) == chroma_sums)[0][0]
+        notes = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
+        tonic = notes[tonic_val]
+        # In standard units, how far is the average pitch from the tonic?
+        z_dist_avg_to_tonic = round((max(chroma_sums) - np.mean(chroma_sums)) / np.std(chroma_sums), 4)
+        # Correlate the chroma sums array with each of the major scales, find the best match
+        best_match = 0
+        best_match_id = 0
+        for key, scale in major_scales.items():
+            # np.corrcoef returns a matrix, only need the first value in the diagonal
+            corr = np.corrcoef(scale, chroma_sums)[0, 1]
+            if corr > best_match:
+                best_match = corr
+                best_match_id = key
+        if tonic != best_match_id:
+            key_sig = tonic + ' Minor'
+        else:
+            key_sig = tonic + ' Major'
+        return tonic, key_sig, z_dist_avg_to_tonic
+
     def extract_features(self):
-        wav, freq = self.load_audio()
+        wav, freq = self.y, self.sr
 
         features = dict()
 
@@ -72,6 +125,13 @@ class WavDetector:
         features['wav_harm_mean'] = np.mean(wav_harm)
         features['wav_perc_mean'] = np.mean(wav_perc)
 
+        features['avg_onset_strength'] = round(np.mean(self.get_tempo_gram()), 4)
+        features['std_onset_strength'] = round(np.std(self.get_tempo_gram()), 4)
+
+        features['tonic'] = self.find_tonic_and_key()[0]
+        features['key_signature'] = self.find_tonic_and_key()[1]
+        features['z_dist_avg_to_tonic'] = self.find_tonic_and_key()[2]
+
         return features
 
 
@@ -88,5 +148,3 @@ if __name__ == '__main__':
 
     # step 3
     print(features)
-
-
