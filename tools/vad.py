@@ -23,5 +23,5 @@ def vad(wav_file):
 
 
 if __name__ == '__main__':
-    wav_file = f"/Users/jaho/Jaho/Job/asr_toolkit/local/62d170af3359860e813ee44bdcf5fe59.wav"  # 0.3497737556561086
+    wav_file = 'local/pure_speak_01.wav'  # 0.3497737556561086
     vad(wav_file)

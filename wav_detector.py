@@ -1,0 +1,66 @@
+import numpy as np
+import librosa
+import librosa.display
+from funasr import AutoModel
+
+
+class WavDetector:
+    def __init__(self, audio_path):
+        self.audio_path = audio_path
+
+    def load_audio(self):
+        y, sr = librosa.load(self.audio_path)
+        return y, sr
+
+    def calculate_mel_spec(self):
+        y, sr = self.load_audio()
+        mel_spec = librosa.feature.melspectrogram(y=y, sr=sr)
+        return mel_spec
+
+    def get_audio_length(self):
+        y, sr = self.load_audio()
+        #y, sr = librosa.load(self.audio_path, sr=None)
+        length_in_seconds = librosa.get_duration(y, sr)
+        return length_in_seconds
+
+    def check_vocal(self):
+        model = AutoModel(model="fsmn-vad")
+
+        total_length = self.get_audio_length()
+        vocal_chunks = model.generate(input=self.audio_path)
+
+        vocal_chunk_length = 0
+        for vocal_chunk in vocal_chunks[0]['value']:
+            vocal_chunk_length += vocal_chunk[1] - vocal_chunk[0]
+
+        gaps = vocal_chunks[0]['value'].__len__()
+        vocal_pct = vocal_chunk_length / (total_length * 1000)
+
+        return gaps, vocal_pct
+
+    def extract_features(self):
+        y, sr = self.load_audio()
+
+        features = dict()
+        features['wav_freq'] = sr
+
+        mel_spec = self.calculate_mel_spec()
+
+        return features
+
+
+if __name__ == '__main__':
+    wav_detector = WavDetector('local/pure_speak_01.wav')
+    features = wav_detector.extract_features()
+
+    # step 1
+    print('total length: ', wav_detector.get_audio_length())
+
+    # step 2
+    print('gaps: ', wav_detector.check_vocal()[0])
+    print('vocal pct: ', wav_detector.check_vocal()[1])
+
+    # step 3
+    print(features)
+
+
