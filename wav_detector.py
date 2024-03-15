@@ -34,7 +34,7 @@ class WavDetector:
         return mel_spec
 
     def get_audio_length(self):
-        length_in_seconds = librosa.get_duration(self.y, self.sr)
+        length_in_seconds = librosa.get_duration(y=self.y, sr=self.sr)
         return length_in_seconds
 
     def check_vocal(self):
