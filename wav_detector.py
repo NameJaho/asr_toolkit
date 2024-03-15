@@ -96,10 +96,50 @@ class WavDetector:
             key_sig = tonic + ' Major'
         return tonic, key_sig, z_dist_avg_to_tonic
 
+    def extract_frequency_range(self):
+        D = np.abs(librosa.stft(self.y))
+
+        freq_indices = np.where(np.sum(D > 0, axis=1) > 0)[0]
+        freq_min = freq_indices.min()
+        freq_max = freq_indices.max()
+
+        freq_min_hz = freq_min * self.sr / (2 * (D.shape[0] - 1))
+        # freq_max_hz = freq_max * self.sr / (2 * (D.shape[0] - 1))
+        freq_max_hz = min(freq_max * self.sr / (2 * (D.shape[0] - 1)), 8000)
+
+        return freq_min_hz, freq_max_hz
+
+    def extract_frequency_range1(self):
+        # 计算短时傅里叶变换(STFT)
+        D = np.abs(librosa.stft(self.y))
+
+        # 计算均方根能量谱
+        S = librosa.feature.rms(S=D)
+
+        # 设置能量阈值
+        threshold = 0.000001 * np.max(S)
+
+        # 找到频率范围的边界索引
+        freq_indices = np.where(np.sum(S > threshold, axis=1) > 0)[0]
+        freq_min = freq_indices.min()
+        freq_max = freq_indices.max()
+
+
+        # 将索引转换为实际频率值
+        freq_min_hz = freq_min * self.sr / (2 * (S.shape[0] - 1))
+        # freq_max_hz = freq_max * self.sr / (2 * (S.shape[0] - 1))
+        freq_max_hz = min(freq_max * self.sr / (2 * (D.shape[0] - 1)), 8000)
+
+        return freq_min_hz, freq_max_hz
+
     def extract_features(self):
         wav, freq = self.y, self.sr
 
         features = dict()
+
+        freq_min_hz, freq_max_hz = self.extract_frequency_range()
+        features['freq_min_hz'] = freq_min_hz
+        features['freq_max_hz'] = freq_max_hz
 
         features['wav_freq'] = freq
         features['wav_points'] = wav.shape[0]
@@ -175,7 +215,7 @@ class WavDetector:
 
 
 if __name__ == '__main__':
-    wav_detector = WavDetector('local/sing_02.wav')
+    wav_detector = WavDetector('local/pure_speak_01.wav')
     features = wav_detector.extract_features()
 
     # step 1
