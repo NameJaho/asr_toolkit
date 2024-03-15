@@ -105,13 +105,13 @@ class WavDetector:
         features['wav_points'] = wav.shape[0]
         features['tempo_bpm'] = librosa.beat.beat_track(y=wav, sr=freq)[0]
 
-        beat_frames = librosa.beat.beat_track(y=wav, sr=freq)[1]
-        beat_times = librosa.frames_to_time(beat_frames, sr=freq)
-        rolloff_freq = np.mean(librosa.feature.spectral_rolloff(y=wav, sr=freq, hop_length=512, roll_percent=0.9))
-
-        features['avg_diff_beat_times'] = round(np.mean(beat_times[1:] - beat_times[0:len(beat_times) - 1]), 4)
-        features['std_diff_beat_times'] = round(np.std(beat_times[1:] - beat_times[0:len(beat_times) - 1]), 4)
-        features['rolloff_freq'] = round(rolloff_freq, 0)
+        # beat_frames = librosa.beat.beat_track(y=wav, sr=freq)[1]
+        # beat_times = librosa.frames_to_time(beat_frames, sr=freq)
+        # rolloff_freq = np.mean(librosa.feature.spectral_rolloff(y=wav, sr=freq, hop_length=512, roll_percent=0.9))
+        #
+        # features['avg_diff_beat_times'] = round(np.mean(beat_times[1:] - beat_times[0:len(beat_times) - 1]), 4)
+        # features['std_diff_beat_times'] = round(np.std(beat_times[1:] - beat_times[0:len(beat_times) - 1]), 4)
+        # features['rolloff_freq'] = round(rolloff_freq, 0)
 
         mel_spec = self.calculate_mel_spec()
         # 时域能量分布特征
@@ -120,18 +120,40 @@ class WavDetector:
         db20_splits = librosa.effects.split(y=wav, frame_length=4000, top_db=20)
         features['db20_splits_size'] = db20_splits.size
 
-        wav_harm, wav_perc = librosa.effects.hpss(wav)
+        # wav_harm, wav_perc = librosa.effects.hpss(wav)
 
-        features['wav_harm_mean'] = np.mean(wav_harm)
-        features['wav_perc_mean'] = np.mean(wav_perc)
+        # features['wav_harm_mean'] = np.mean(wav_harm)
+        # features['wav_perc_mean'] = np.mean(wav_perc)
+        #
+        # features['avg_onset_strength'] = round(np.mean(self.get_tempo_gram()), 4)
+        # features['std_onset_strength'] = round(np.std(self.get_tempo_gram()), 4)
 
-        features['avg_onset_strength'] = round(np.mean(self.get_tempo_gram()), 4)
-        features['std_onset_strength'] = round(np.std(self.get_tempo_gram()), 4)
+        # features['tonic'] = self.find_tonic_and_key()[0]
+        # features['key_signature'] = self.find_tonic_and_key()[1]
+        # features['z_dist_avg_to_tonic'] = self.find_tonic_and_key()[2]
 
-        features['tonic'] = self.find_tonic_and_key()[0]
-        features['key_signature'] = self.find_tonic_and_key()[1]
-        features['z_dist_avg_to_tonic'] = self.find_tonic_and_key()[2]
+        # Compute the first-order difference of the mel spectrogram
+        delta_mel_spec = np.diff(mel_spec, axis=0)
 
+        # Compute the second-order difference of the mel spectrogram
+        delta2_mel_spec = np.diff(delta_mel_spec, axis=0)
+
+        # Extract the pitch changes
+        pitch_changes = np.argmax(delta2_mel_spec, axis=0)
+        # Remove the zero values from the pitch changes array
+        pitch_changes = pitch_changes[pitch_changes != 0]
+
+        # Convert the pitch changes to pitch values (in semitones)
+        pitch_values = librosa.hz_to_midi(self.sr * pitch_changes)
+        print(pitch_values)
+        from scipy.signal import savgol_filter
+        # Smooth the pitch values
+        smoothed_pitch_values = savgol_filter(pitch_values, window_length=11, polyorder=3)
+
+        # Compute the standard deviation of the smoothed pitch values
+        std_pitch_change = np.std(smoothed_pitch_values)
+
+        features['std_pitch_change'] = std_pitch_change
         return features
 
 
