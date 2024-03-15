@@ -145,7 +145,7 @@ class WavDetector:
 
         # Convert the pitch changes to pitch values (in semitones)
         pitch_values = librosa.hz_to_midi(self.sr * pitch_changes)
-        print(pitch_values)
+
         from scipy.signal import savgol_filter
         # Smooth the pitch values
         smoothed_pitch_values = savgol_filter(pitch_values, window_length=11, polyorder=3)
@@ -154,11 +154,28 @@ class WavDetector:
         std_pitch_change = np.std(smoothed_pitch_values)
 
         features['std_pitch_change'] = std_pitch_change
+
+        # ---
+        # Convert the mel spectrogram to a one-dimensional array
+        mel_spec = mel_spec.ravel()
+        # Compute the peaks of the mel spectrogram
+        peaks = librosa.util.peak_pick(mel_spec, 10, 5, 5, 20, 3000, wait=1)
+        print("peaks ", peaks)
+        # Clip the peaks to the range of human hearing
+        peaks = np.clip(peaks, 20, 20000)
+        print("clip peaks ", peaks)
+        # Convert the peaks to frequencies (in Hz)
+        if len(peaks) > 0:
+            frequencies = librosa.mel_to_hz(peaks[0])
+        else:
+            frequencies = None
+        features['frequencies'] = frequencies
+
         return features
 
 
 if __name__ == '__main__':
-    wav_detector = WavDetector('local/pure_speak_01.wav')
+    wav_detector = WavDetector('local/sing_02.wav')
     features = wav_detector.extract_features()
 
     # step 1
