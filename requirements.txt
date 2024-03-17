@@ -7,3 +7,6 @@ torch
 ffmpeg
 torchaudio
 modelscope
+hdbscan
+pandas
+openpyxl
