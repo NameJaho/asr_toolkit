@@ -13,20 +13,21 @@ class VocalSeparator:
     def __init__(self):
         self.root_path = get_root_path()
         self.weight_uvr5_root = os.path.join(self.root_path, "models/uvr5_weights")
-        self.input_path = os.path.join(self.root_path, "output", "audios")
+        #self.input_path = os.path.join(self.root_path, "output", "audios")
         self.vocals_path = os.path.join(self.root_path, "output", "vocals")
         self.background_path = os.path.join(self.root_path, "output", "background")
         self.reformat_path = os.path.join(self.root_path, "output", "reformat")
-        self.model_name = "VR-DeEchoAggressive"
+        #self.model_name = "VR-DeEchoAggressive"
+        self.model_name = "HP2_all_vocals"
         self.device = get_infer_device()
         self.is_half = is_half(self.device)
 
-    def uvr(self, agg=10, output_format="wav"):
+    def uvr(self, file_path, agg=15, output_format="wav"):
         # agg: 人声提取激进程度, 0-20
         # output_format: ["wav", "flac", "mp3", "m4a"]
         logs = []
         model_name = self.model_name
-        file_paths = get_file_paths(self.input_path)
+        #file_paths = get_file_paths(self.input_path)
 
         if not os.path.exists(self.vocals_path):
             os.makedirs(self.vocals_path)
@@ -49,54 +50,53 @@ class VocalSeparator:
                     is_half=self.is_half,
                 )
 
-            for file_path in file_paths:
-                id_ = re.findall('audios/(.*?).wav', file_path)[0]
-                output_path = self.root_path + f'/output/vocals/vocal_{id_}.wav_10.wav'
-                logger.info(output_path)
-                reformat_required = True
-                done = False
+            id_ = re.findall('(.*?).wav', file_path)[0]
+            output_path = self.root_path + f'/output/vocals/vocal_{id_}.wav'
+            logger.info(output_path)
+            reformat_required = True
+            done = False
 
-                # if vocal file already exists, skip
-                if os.path.exists(output_path):
-                    logger.debug(f'[{id_}] => output file exists')
-                    continue
+            # if vocal file already exists, skip
+            if os.path.exists(output_path):
+                logger.debug(f'[{id_}] => output file exists')
+                return
 
-                try:
-                    info = ffmpeg.probe(file_path, cmd="ffprobe")
-                    if (
-                            info["streams"][0]["channels"] == 2
-                            and info["streams"][0]["sample_rate"] == "44100"
-                    ):
-                        reformat_required = False
-                        pre_fun._path_audio_(
-                            file_path, self.background_path, self.vocals_path, output_format, is_hp3
-                        )
-                        done = True
-                except:
-                    reformat_required = True
-                    logger.debug(traceback.print_exc())
-                if reformat_required:
-                    tmp_path = "%s/%s" % (
-                        self.reformat_path,
-                        os.path.basename(file_path),
+            try:
+                info = ffmpeg.probe(file_path, cmd="ffprobe")
+                if (
+                        info["streams"][0]["channels"] == 2
+                        and info["streams"][0]["sample_rate"] == "44100"
+                ):
+                    reformat_required = False
+                    pre_fun._path_audio_(
+                        file_path, self.background_path, self.vocals_path, output_format, is_hp3
                     )
+                    done = True
+            except:
+                reformat_required = True
+                logger.debug(traceback.print_exc())
+            if reformat_required:
+                tmp_path = "%s/%s" % (
+                    self.reformat_path,
+                    os.path.basename(file_path),
+                )
 
-                    cmd = "ffmpeg -i %s -vn -acodec pcm_s16le -ac 2 -ar 44100 %s -y" % (file_path, tmp_path)
-                    os.system(cmd)
+                cmd = "ffmpeg -i %s -vn -acodec pcm_s16le -ac 2 -ar 44100 %s -y" % (file_path, tmp_path)
+                os.system(cmd)
 
-                    file_path = tmp_path
-                try:
-                    if not done:
-                        pre_fun._path_audio_(
-                            file_path, self.background_path, self.vocals_path, output_format, is_hp3
-                        )
-                    logs.append("%s->Success" % (os.path.basename(file_path)))
-                    logger.debug("\n".join(logs))
-                except:
-                    logger.debug(traceback.print_exc())
+                file_path = tmp_path
+            try:
+                if not done:
+                    pre_fun._path_audio_(
+                        file_path, self.background_path, self.vocals_path, output_format, is_hp3
+                    )
+                logs.append("%s->Success" % (os.path.basename(file_path)))
+                logger.debug("\n".join(logs))
+            except:
+                logger.debug(traceback.print_exc())
 
-                    logs.append("%s->%s" % (os.path.basename(file_path), traceback.format_exc()))
-                    # logger.debug("\n".join(logs))
+                logs.append("%s->%s" % (os.path.basename(file_path), traceback.format_exc()))
+                # logger.debug("\n".join(logs))
 
         except:
             logs.append(traceback.format_exc())

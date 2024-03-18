@@ -53,13 +53,9 @@ class WavDetector:
 
         """
         energy = librosa.feature.rms(self.y)
-
-        energy_mean = np.mean(energy)
         energy_std = np.std(energy)
 
-        self.features['energy_mean'] = energy_mean
         self.features['energy_std'] = energy_std
-
         return self.features
 
     @timer
@@ -76,11 +72,40 @@ class WavDetector:
         self.features['db20_splits_size'] = db20_splits.size/self.get_duration()
         return self.features
 
+    @timer
+    def extract_loudness(self):
+        # 计算响度（RMS 值）
+        loudness = librosa.feature.rms(y=self.y)
+
+        # 计算响度均值
+        mean_loudness = loudness.mean()
+        self.features['mean_loudness'] = mean_loudness
+        return mean_loudness
+
+    @timer
+    def extract_mean_energy(self):
+        # 计算短时傅里叶变换（STFT）
+        stft = librosa.stft(self.y)
+
+        # 计算每个频谱帧的能量
+        energy = np.abs(stft) ** 2
+
+        # 计算能量的对数
+        log_energy = librosa.amplitude_to_db(energy, ref=np.max)
+
+        # 计算能量的均值
+        mean_energy = log_energy.mean(axis=1)
+
+        self.features['mean_energy'] = mean_energy
+        return mean_energy
+
     def extract_features(self):
         self.get_duration()
         self.extract_db20_splits()
         self.extract_energy()
         self.extract_rhythm()
+        self.extract_loudness()
+        self.extract_mean_energy()
 
         self.check_vocal()
 
