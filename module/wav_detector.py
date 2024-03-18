@@ -52,7 +52,7 @@ class WavDetector:
         Returns: features dict.
 
         """
-        energy = librosa.feature.rms(self.y)
+        energy = librosa.feature.rms(y=self.y)
 
         energy_mean = np.mean(energy)
         energy_std = np.std(energy)
@@ -65,7 +65,7 @@ class WavDetector:
     @timer
     def extract_rhythm(self):
         # 提取节奏特征
-        onset_frames = librosa.onset.onset_detect(self.y, sr=self.sr)
+        onset_frames = librosa.onset.onset_detect(y=self.y, sr=self.sr)
         rhythm_per_sec = len(onset_frames) / self.get_duration()
         self.features['rhythm_per_sec'] = rhythm_per_sec
         return self.features
@@ -86,11 +86,10 @@ class WavDetector:
 
         return self.features
 
-
 if __name__ == '__main__':
     wav_detector = WavDetector('../test/files/speech_01.wav')
 
-    gaps, vocal_pct = wav_detector.check_vocal()
+    # gaps, vocal_pct = wav_detector.check_vocal()
 
     features = wav_detector.extract_features()
 
