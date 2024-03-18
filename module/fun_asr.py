@@ -4,7 +4,7 @@ import os
 from funasr import AutoModel
 from loguru import logger
 
-from tools.my_utils import get_root_path
+from tools.utils import get_root_path
 
 
 class FunAsr:

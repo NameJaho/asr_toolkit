@@ -1,6 +1,6 @@
 import re
 
-from tools.my_utils import *
+from tools.utils import *
 from module.uvr5.mdxnet import MDXNetDereverb
 from module.uvr5.vr import AudioPre, AudioPreDeEcho
 import ffmpeg
