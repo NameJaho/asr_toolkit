@@ -93,4 +93,4 @@
 - [ ] Auto Detection(M) - 自动判断是否应该做人声分离
 - [ ] multilingual(L) - 新增ARS英文模型
 - [*] 声纹识别(L) - 多人对话时区分角色
-- [] audio detector(H) - 过滤掉无效音频内容(标题判断，人声判断，头部抽样)
+- [*] audio detector(H) - 过滤掉无效音频内容(人声判断，人声分离抽样)
