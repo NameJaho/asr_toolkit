@@ -222,6 +222,6 @@ def execute():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True, port=23002)
+    app.run(host='0.0.0.0', debug=True, port=8899)
 
 # curl -X POST -H "Content-Type: application/json" -d '{"video_url": "guoc_test_00006afed434d4eb95af94b1ef03dac2"}' http://127.0.0.1:23002/video/parse
