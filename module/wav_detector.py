@@ -2,8 +2,8 @@ import numpy as np
 import librosa
 import librosa.display
 from funasr import AutoModel
-import tools.utils as utils
-from tools.utils import timer
+# import tools.utils as utils
+from tools.utils import timer, get_root_path
 import os
 import warnings
 
@@ -14,7 +14,7 @@ VAD_MODEL_NAME = "speech_fsmn_vad_zh-cn-16k-common-pytorch"
 class WavDetector:
     def __init__(self, audio_path):
         self.audio_path = audio_path
-        self.vad_model_path = os.path.join(utils.get_root_path(), "models", VAD_MODEL_NAME)
+        self.vad_model_path = os.path.join(get_root_path(), "models", VAD_MODEL_NAME)
         self.y, self.sr = librosa.load(self.audio_path)
         self.features = {}
 
