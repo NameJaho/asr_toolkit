@@ -2,11 +2,14 @@ import json
 import re
 
 import requests
-from flask import Flask, request, jsonify
+from fastapi import FastAPI
+# from flask import Flask, request, jsonify
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from numpy import float32
 from pydub import AudioSegment
 
+from api.request import MainRequest, ClsRequest
+from api.response import MainResponse, TargetCatResponseData, ClsResponse
 from module.classify_api import classify
 from module.wav_detector import WavDetector
 from tools import audio_extractor
@@ -17,11 +20,27 @@ from loguru import logger
 from tools.utils import timer
 import os
 
-app = Flask(__name__)
+# app = Flask(__name__)
 
 INPUT_VIDEOS_FOLDER = 'data'
 OUTPUT_AUDIOS_FOLDER = 'output/audios'
 OUTPUT_TEXTS_FOLDER = 'output/texts'
+
+app = FastAPI(title='Asr System', version='1.0.0',
+              )
+
+
+# app.add_exception_handler(CategoryError, category_error_handler)
+
+
+def get_response(data: dict = None, code=200):
+    """
+    统一响应
+    """
+    return {
+        "code": code,
+        "data": data
+    }
 
 
 class Executor:
@@ -223,33 +242,51 @@ class Executor:
         return self.format_feature(features)
 
 
-@app.route('/video/parse', methods=['POST'])
-def execute():
-    data = request.json
-    video_url = data.get('video_url')
-    video_id = data.get('video_id')
-    video_tag_list = data.get('video_tag_list')
-    title = data.get('title')
-    content = data.get('content')
+@app.post(path="/video/parse", response_model=MainResponse, summary="统一入口")
+def execute(request: MainRequest):
+    video_url = request.video_url
+    video_id = request.video_id
+    video_tag_list = request.video_tag_list
+    title = request.title
+    content = request.content
     logger.info(video_url)
     executor = Executor()
     features = executor.process(video_url, video_id, video_tag_list, title, content)
     logger.info(features)
     if isinstance(features, str):
-        return jsonify({
-            'status': -1,
-            'message': features,
-            "data": {}
+        return get_response({
+            "code": -1,
+            "data": features,
         })
     else:
-        return jsonify({
-            'status': 0,
-            "message": "Success",
-            'data': features
+        return get_response({
+            'features': features
         })
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True, port=8899)
+@app.post(path="/target_categories", response_model=TargetCatResponseData, summary="获取目标分类")
+def get_categories():
+    executor = Executor()
+    return get_response({
+        'data': executor.target_category
+    })
 
+
+@app.post(path="/classify", response_model=ClsResponse, summary="传入content和title进行分类")
+def classify_(request: ClsRequest):
+    executor = Executor()
+    content = request.content
+    title = request.title
+    label, predictions = executor.classify(content, title)
+    return get_response({
+        'label': label,
+        'predictions': predictions
+    })
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("executor_fast_app:app", host="0.0.0.0", port=8899, reload=True)
+    # uvicorn.run(app, host="0.0.0.0", port=7879)
 # curl -X POST -H "Content-Type: application/json" -d '{"video_url": "guoc_test_00006afed434d4eb95af94b1ef03dac2"}' http://127.0.0.1:23002/video/parse
