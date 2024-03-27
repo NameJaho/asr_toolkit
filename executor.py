@@ -1,9 +1,9 @@
 from tools import audio_extractor
 from module.uvr5_model import VocalSeparator
 from module.asr_model import ASRModel
-from tools.my_utils import *
+from tools.utils import *
 from loguru import logger
-from tools.my_utils import timer
+from tools.utils import timer
 import os
 
 INPUT_VIDEOS_FOLDER = 'data'
@@ -62,6 +62,6 @@ class Executor:
 
 if __name__ == '__main__':
     executor = Executor()
-    executor.convert_videos()
+    # executor.convert_videos()
     # executor.separate_vocals()
     executor.asr()
