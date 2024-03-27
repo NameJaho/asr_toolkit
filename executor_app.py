@@ -140,7 +140,7 @@ class Executor:
                 data[k] = float(v)
         return data
 
-    def process(self, video_url, video_id):
+    def process(self, video_url, video_id, video_tag_list, title):
         file_name = self.download(video_url, video_id)
         if not file_name:
             return "Failure: Download failed."
@@ -192,7 +192,8 @@ class Executor:
                     features['vocal_qualified'] = False
                     features['asr'] = False
         features['id'] = video_id
-        features['name'] = video_id
+        features['title'] = title
+        features['video_tag_list'] = video_tag_list
         features['video_url'] = video_url
         features['asr_text'] = self.asr_model.inference(file_name)[0]['text']
         return self.format_feature(features)
@@ -203,9 +204,11 @@ def execute():
     data = request.json
     video_url = data.get('video_url')
     video_id = data.get('video_id')
+    video_tag_list = data.get('video_tag_list')
+    title = data.get('title')
     logger.info(video_url)
     executor = Executor()
-    features = executor.process(video_url, video_id)
+    features = executor.process(video_url, video_id,video_tag_list,title)
     logger.info(features)
     if isinstance(features, str):
         return jsonify({
