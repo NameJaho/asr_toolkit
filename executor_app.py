@@ -106,11 +106,11 @@ class Executor:
     @staticmethod
     def filter(features):
         if features['duration'] <= 60:
-            return "Failure: Duration is not greater than 30."
+            return "绝对时长小于60s"
         if features['vocal_pct'] <= 0.7:
-            return "Failure: Vocal percentage is not greater than 0.7."
+            return "人声占比小于0.7"
         if features['vocal_duration'] <= 30000:
-            return "Failure: Vocal duration is not greater than 30000."
+            return "人声时长小于30s"
 
         print(f'features is ok : {features}')
         return "Success"
@@ -143,16 +143,16 @@ class Executor:
     def process(self, video_url, video_id, video_tag_list, title):
         file_name = self.download(video_url, video_id)
         if not file_name:
-            return "Failure: Download failed."
+            return "视频下载失败"
 
 
         features = self.extract_features(file_name)
         if not features:
-            return "Failure: Extract features failed."
+            return "特征抽取失败"
 
         filter_result = self.filter(features)
 
-        if 'Failure' in filter_result:
+        if 'Success' not in filter_result:
             return filter_result
 
         if features['db20_splits_size'] >= 0.08:
@@ -173,7 +173,7 @@ class Executor:
                     self.vs.uvr(file_path, agg=15)
                 except Exception as e:
                     logger.error("分离人声失败: %s" % e)
-                    return "分离人声失败: %s" % e
+                    return "分离人声失败"
                 vocal_path = f"{self.vs.vocals_path}/{self.vs.vocal_name}"
                 logger.info(file_path)
 
@@ -182,7 +182,7 @@ class Executor:
                     vocal_features = wav_detector.extract_features()
                 except Exception as e:
                     logger.error("wav_detector 失败: %s" % e)
-                    return "wav_detector 失败: %s" % e
+                    return "人声音频特征抽取失败"
 
                 features['vocal_db20_splits_size'] = vocal_features['db20_splits_size']
                 if vocal_features['db20_splits_size'] < 0.1:
@@ -191,6 +191,7 @@ class Executor:
                 else:
                     features['vocal_qualified'] = False
                     features['asr'] = False
+                    return "声谱特征排除(db20_splits_size >= 0.1)"
         features['id'] = video_id
         features['title'] = title
         features['video_tag_list'] = video_tag_list
