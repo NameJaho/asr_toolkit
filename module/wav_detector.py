@@ -2,8 +2,8 @@ import numpy as np
 import librosa
 import librosa.display
 from funasr import AutoModel
-import tools.my_utils as utils
-from tools.my_utils import timer
+import tools.utils as utils
+from tools.utils import timer
 import os
 import warnings
 
