@@ -6,6 +6,7 @@ from typing import List, Any, Union
 class CommonResponse(BaseModel):
     code: int = Field(..., description="返回信息")
     data: Any  # 可根据需要进一步指定
+    # msg: str = Field(None, description="返回信息")
 
 
 # 品类标准化响应
@@ -22,7 +23,7 @@ class NormalizeResponse(CommonResponse):
 
 # 品牌接口响应
 class MainResponseData(BaseModel):
-    features: Union[dict, str] = Field(..., description="asr全流程结果",
+    features: Union[dict, str] = Field(None, description="asr全流程结果",
                                        example={
                                            "features": {
                                                "duration": 83.24199546485261,
@@ -42,6 +43,7 @@ class MainResponseData(BaseModel):
                                                "asr_text": "我的大嘴怪好朋友长的一个大大的嘴巴，尖尖的牙齿上有着漂亮的颜色，可以让小朋友在上面欢快的捉迷藏，他的嘴巴里还放着滑滑梯，还有小朋友们的家，不仅可以在里面玩耍锻炼身体，还可以休息。他的舌头就像一条通道，小朋友们可以走进大嘴怪的嘴里。嗯，腿怪不仅嘴巴大，身体也不一般，既长着翅膀，可以在天上飞，还长着鱼的尾巴，可以在水里游长着鸭子的脚，可以在路上走，真的是好，特别嘴巴大长得怪，还喜欢与小朋友们一起欢快的玩耍，心地善良，长得还漂亮。这样的大嘴怪，你喜欢吗？"
                                            }
                                        })
+    msg: str = Field(None,description="返回信息")
 
 
 class MainResponse(CommonResponse):
@@ -54,6 +56,7 @@ class TargetCatResponseData(BaseModel):
                                             "日用百货",
                                             "食品饮料", "电器", "保健品", "科技数码", "美妆个护", "购物", ]
                                    )
+    msg: str = Field(None,description="返回信息")
 
 
 class TargetCatResponse(CommonResponse):
@@ -74,6 +77,7 @@ class ClsResponseData(BaseModel):
                                       "score": 0.6194684983840593
                                   }
                               ])
+    msg: str = Field(None,description="返回信息")
 
 
 class ClsResponse(CommonResponse):

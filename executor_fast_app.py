@@ -1,9 +1,6 @@
-import json
 import re
-
 import requests
 from fastapi import FastAPI
-# from flask import Flask, request, jsonify
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from numpy import float32
 from pydub import AudioSegment
@@ -236,6 +233,8 @@ class Executor:
                     return "声谱特征排除(db20_splits_size >= 0.1)"
         features['id'] = video_id
         features['title'] = title
+        features['label'] = label
+        features['predictions'] = predictions
         features['video_tag_list'] = video_tag_list
         features['video_url'] = video_url
         features['asr_text'] = self.asr_model.inference(file_name)[0]['text']
@@ -256,11 +255,12 @@ def execute(request: MainRequest):
     if isinstance(features, str):
         return get_response({
             "code": -1,
-            "data": features,
+            "msg": features,
         })
     else:
         return get_response({
-            'features': features
+            'features': features,
+            'msg':'success'
         })
 
 
@@ -268,7 +268,9 @@ def execute(request: MainRequest):
 def get_categories():
     executor = Executor()
     return get_response({
-        'data': executor.target_category
+        'data': executor.target_category,
+        'msg': 'success'
+
     })
 
 
@@ -280,7 +282,9 @@ def classify_(request: ClsRequest):
     label, predictions = executor.classify(content, title)
     return get_response({
         'label': label,
-        'predictions': predictions
+        'predictions': predictions,
+        'msg': 'success'
+
     })
 
 

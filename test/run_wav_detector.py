@@ -149,7 +149,6 @@ class MyTest(object):
         df = pd.DataFrame(result)
         df.to_excel('result_02.xlsx', index=False)
 
-
     def process(self):
         # excel = '240321_小红书视频文章随机3000篇.xlsx'
         excel = 'result.xlsx'
@@ -321,10 +320,12 @@ if __name__ == '__main__':
     import requests
 
     data = {
-        "video_url": "https://sns-video-hw.xhscdn.net/2_5821beb8b46c5d0e371d7f11_compress_L1",
-        "video_id": "2_5821beb8b46c5d0e371d7f11_compress_L1"
+        "video_url": "https://sns-video-al.xhscdn.com/01e2b407823db72701037003818f3e0e32_258.mp4",
+        "video_id": "01e2b407823db72701037003818f3e0e32_258",
+        "title": 'ts',
+        "video_tag_list": 'tag_ts'
     }
-    res = requests.post('http://127.0.0.1:23002/video/parse', json=data)
+    res = requests.post('http://183.6.28.97:8899/video/parse', json=data)
     print(res.json())
     print(time.time() - start)
     # ts.tmp()
