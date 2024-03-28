@@ -115,6 +115,8 @@ class Executor:
         try:
             features = self.wav_detector.extract_features(file_name)
         except:
+            import traceback
+            logger.error(traceback.format_exc())
             return {}
         else:
             return features
