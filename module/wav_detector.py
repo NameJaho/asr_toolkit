@@ -18,6 +18,7 @@ class WavDetector:
         self.vad_model_path = os.path.join(get_root_path(), "models", VAD_MODEL_NAME)
         self.y, self.sr = librosa.load(self.audio_path)
         self.features = {}
+        self.model = AutoModel(model=self.vad_model_path)
 
     def get_duration(self):
         duration = librosa.get_duration(y=self.y, sr=self.sr)
@@ -28,8 +29,7 @@ class WavDetector:
     def check_vocal(self):
         total_length = self.get_duration()
 
-        model = AutoModel(model=self.vad_model_path)
-        vocal_chunks = model.generate(input=self.audio_path)
+        vocal_chunks = self.model.generate(input=self.audio_path)
 
         vocal_duration = 0
         for vocal_chunk in vocal_chunks[0]['value']:
