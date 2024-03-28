@@ -13,10 +13,11 @@ VAD_MODEL_NAME = "speech_fsmn_vad_zh-cn-16k-common-pytorch"
 
 
 class WavDetector:
-    def __init__(self, audio_path):
-        self.audio_path = audio_path
+    def __init__(self):
+        self.y = None
+        self.sr = None
+        self.audio_path = None
         self.vad_model_path = os.path.join(get_root_path(), "models", VAD_MODEL_NAME)
-        self.y, self.sr = librosa.load(self.audio_path)
         self.features = {}
         self.model = AutoModel(model=self.vad_model_path)
 
@@ -77,7 +78,10 @@ class WavDetector:
         self.features['db20_splits_size'] = db20_splits.size/self.get_duration()
         return self.features
 
-    def extract_features(self):
+    def extract_features(self,file_name):
+        self.audio_path = file_name
+        self.y, self.sr = librosa.load(self.audio_path)
+
         self.get_duration()
         self.extract_db20_splits()
         self.extract_energy()

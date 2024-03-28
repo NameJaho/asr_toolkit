@@ -5,7 +5,7 @@ from typing import List, Any, Union
 # 通用响应模型
 class CommonResponse(BaseModel):
     code: int = Field(..., description="返回信息")
-    data: Any  # 可根据需要进一步指定
+    # data: Any  # 可根据需要进一步指定
     # msg: str = Field(None, description="返回信息")
 
 
@@ -44,6 +44,7 @@ class MainResponseData(BaseModel):
                                            }
                                        })
     msg: str = Field(None,description="返回信息")
+    code: int = Field(..., description="返回信息")
 
 
 class MainResponse(CommonResponse):
@@ -51,12 +52,14 @@ class MainResponse(CommonResponse):
 
 
 class TargetCatResponseData(BaseModel):
-    data: Union[dict, str] = Field(..., description="目标分类",
+    categories: list = Field(..., description="目标分类",
                                    example=["宠物用品", "宠物食品", "零食", "母婴用品", "家具", "家居百货", "珠宝配饰",
                                             "日用百货",
                                             "食品饮料", "电器", "保健品", "科技数码", "美妆个护", "购物", ]
                                    )
     msg: str = Field(None,description="返回信息")
+    code: int = Field(..., description="返回信息")
+
 
 
 class TargetCatResponse(CommonResponse):
@@ -78,6 +81,8 @@ class ClsResponseData(BaseModel):
                                   }
                               ])
     msg: str = Field(None,description="返回信息")
+    code: int = Field(..., description="返回信息")
+
 
 
 class ClsResponse(CommonResponse):

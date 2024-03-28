@@ -6,7 +6,7 @@ from numpy import float32
 from pydub import AudioSegment
 
 from api.request import MainRequest, ClsRequest
-from api.response import MainResponse, TargetCatResponseData, ClsResponse
+from api.response import MainResponse, TargetCatResponseData, ClsResponse, MainResponseData, ClsResponseData
 from module.classify_api import classify
 from module.wav_detector import WavDetector
 from tools import audio_extractor
@@ -34,10 +34,7 @@ def get_response(data: dict = None, code=200):
     """
     统一响应
     """
-    return {
-        "code": code,
-        "data": data
-    }
+    return data
 
 
 class Executor:
@@ -45,6 +42,8 @@ class Executor:
         self.vocal_separator = VocalSeparator()
         self.asr_model = ASRModel()
         self.vs = VocalSeparator()
+        self.wav_detector = WavDetector()
+
         self.target_category = ["宠物用品", "宠物食品", "零食", "母婴用品", "家具", "家居百货", "珠宝配饰", "日用百货",
                                 "食品饮料", "电器", "保健品", "科技数码", "美妆个护", "购物", ]
 
@@ -112,11 +111,9 @@ class Executor:
                 return False
         return file_name
 
-    @staticmethod
-    def extract_features(file_name):
+    def extract_features(self, file_name):
         try:
-            wav_detector = WavDetector(file_name)
-            features = wav_detector.extract_features()
+            features = self.wav_detector.extract_features(file_name)
         except:
             return {}
         else:
@@ -241,7 +238,10 @@ class Executor:
         return self.format_feature(features)
 
 
-@app.post(path="/video/parse", response_model=MainResponse, summary="统一入口")
+executor = Executor()
+
+
+@app.post(path="/video/parse", response_model=MainResponseData, summary="统一入口")
 def execute(request: MainRequest):
     video_url = request.video_url
     video_id = request.video_id
@@ -249,42 +249,46 @@ def execute(request: MainRequest):
     title = request.title
     content = request.content
     logger.info(video_url)
-    executor = Executor()
+    # executor = Executor()
     features = executor.process(video_url, video_id, video_tag_list, title, content)
     logger.info(features)
     if isinstance(features, str):
         return get_response({
             "code": -1,
+            "features":"",
             "msg": features,
         })
     else:
         return get_response({
             'features': features,
-            'msg':'success'
+            'msg': 'success',
+            "code": 200,
+
         })
 
 
 @app.post(path="/target_categories", response_model=TargetCatResponseData, summary="获取目标分类")
 def get_categories():
-    executor = Executor()
+    # executor = Executor()
     return get_response({
-        'data': executor.target_category,
-        'msg': 'success'
+        'categories': executor.target_category,
+        'msg': 'success',
+        'code': 200
 
     })
 
 
-@app.post(path="/classify", response_model=ClsResponse, summary="传入content和title进行分类")
+@app.post(path="/classify", response_model=ClsResponseData, summary="传入content和title进行分类")
 def classify_(request: ClsRequest):
-    executor = Executor()
+    # executor = Executor()
     content = request.content
     title = request.title
     label, predictions = executor.classify(content, title)
     return get_response({
         'label': label,
         'predictions': predictions,
-        'msg': 'success'
-
+        'msg': 'success',
+        'code': 200
     })
 
 
