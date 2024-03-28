@@ -216,8 +216,8 @@ class Executor:
                 logger.info(file_path)
 
                 try:
-                    wav_detector = WavDetector(vocal_path)
-                    vocal_features = wav_detector.extract_features()
+                    wav_detector = WavDetector()
+                    vocal_features = wav_detector.extract_features(vocal_path)
                 except Exception as e:
                     logger.error("wav_detector 失败: %s" % e)
                     return "人声音频特征抽取失败"
