@@ -153,7 +153,7 @@ class Executor:
     def format_feature(data):
         for k, v in data.items():
             if isinstance(v, float32):
-                data[k] = float(v)
+                data[k] = round(float(v), 2)
         return data
 
     @staticmethod
@@ -235,7 +235,13 @@ class Executor:
         features['video_tag_list'] = video_tag_list
         features['video_url'] = video_url
         features['asr_text'] = self.asr_model.inference(file_name)[0]['text']
-        return self.format_feature(features)
+        result = {
+            "predictions": predictions,
+            "label": label,
+            'asr_text': features['asr_text'],
+        }
+        # return self.format_feature(features)
+        return result
 
 
 executor = Executor()
@@ -255,15 +261,18 @@ def execute(request: MainRequest):
     if isinstance(features, str):
         return get_response({
             "code": -1,
-            "features":"",
+            "asr_text": "",
+            "label": "",
+            "predictions": [],
             "msg": features,
         })
     else:
         return get_response({
-            'features': features,
+            "asr_text": features['asr_text'],
+            "label": features['label'],
+            "predictions": features['predictions'],
             'msg': 'success',
             "code": 200,
-
         })
 
 

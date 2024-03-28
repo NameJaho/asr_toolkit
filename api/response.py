@@ -23,27 +23,41 @@ class NormalizeResponse(CommonResponse):
 
 # 品牌接口响应
 class MainResponseData(BaseModel):
-    features: Union[dict, str] = Field(None, description="asr全流程结果",
-                                       example={
-                                           "features": {
-                                               "duration": 83.24199546485261,
-                                               "db20_splits_size": 1.1772903743204797,
-                                               "energy_mean": 0.1369696706533432,
-                                               "energy_std": 0.1104106679558754,
-                                               "rhythm_per_sec": 4.565003492263084,
-                                               "gaps_per_sec": 0.10811850376412568,
-                                               "vocal_duration": 62080,
-                                               "vocal_pct": 0.7457774126307692,
-                                               "music_detected": False,
-                                               "asr": True,
-                                               "id": "01e2b407823db72701037003818f3e0e32_258",
-                                               "title": "这个蜜桃味唇油可爱到我心里了 有被惊喜到",
-                                               "video_tag_list": "四宝茶;元气四宝;元气四宝汤;元气四宝茶",
-                                               "video_url": "https://sns-video-al.xhscdn.com/01e2b407823db72701037003818f3e0e32_258.mp4",
-                                               "asr_text": "我的大嘴怪好朋友长的一个大大的嘴巴，尖尖的牙齿上有着漂亮的颜色，可以让小朋友在上面欢快的捉迷藏，他的嘴巴里还放着滑滑梯，还有小朋友们的家，不仅可以在里面玩耍锻炼身体，还可以休息。他的舌头就像一条通道，小朋友们可以走进大嘴怪的嘴里。嗯，腿怪不仅嘴巴大，身体也不一般，既长着翅膀，可以在天上飞，还长着鱼的尾巴，可以在水里游长着鸭子的脚，可以在路上走，真的是好，特别嘴巴大长得怪，还喜欢与小朋友们一起欢快的玩耍，心地善良，长得还漂亮。这样的大嘴怪，你喜欢吗？"
-                                           }
-                                       })
+    # features: Union[dict, str] = Field(None, description="asr全流程结果",
+    #                                    example={
+    #                                        "features": {
+    #                                            "duration": 83.24199546485261,
+    #                                            "db20_splits_size": 1.1772903743204797,
+    #                                            "energy_mean": 0.1369696706533432,
+    #                                            "energy_std": 0.1104106679558754,
+    #                                            "rhythm_per_sec": 4.565003492263084,
+    #                                            "gaps_per_sec": 0.10811850376412568,
+    #                                            "vocal_duration": 62080,
+    #                                            "vocal_pct": 0.7457774126307692,
+    #                                            "music_detected": False,
+    #                                            "asr": True,
+    #                                            "id": "01e2b407823db72701037003818f3e0e32_258",
+    #                                            "title": "这个蜜桃味唇油可爱到我心里了 有被惊喜到",
+    #                                            "video_tag_list": "四宝茶;元气四宝;元气四宝汤;元气四宝茶",
+    #                                            "video_url": "https://sns-video-al.xhscdn.com/01e2b407823db72701037003818f3e0e32_258.mp4",
+    #                                            "asr_text": "我的大嘴怪好朋友长的一个大大的嘴巴，尖尖的牙齿上有着漂亮的颜色，可以让小朋友在上面欢快的捉迷藏，他的嘴巴里还放着滑滑梯，还有小朋友们的家，不仅可以在里面玩耍锻炼身体，还可以休息。他的舌头就像一条通道，小朋友们可以走进大嘴怪的嘴里。嗯，腿怪不仅嘴巴大，身体也不一般，既长着翅膀，可以在天上飞，还长着鱼的尾巴，可以在水里游长着鸭子的脚，可以在路上走，真的是好，特别嘴巴大长得怪，还喜欢与小朋友们一起欢快的玩耍，心地善良，长得还漂亮。这样的大嘴怪，你喜欢吗？"
+    #                                        }
+    #                                    })
     msg: str = Field(None,description="返回信息")
+    asr_text: str = Field(None,description="asr结果")
+    label: str = Field(..., description="美妆个护",
+                       example='')
+    predictions: list = Field(..., description="分类结果",
+                              example=[
+                                  {
+                                      "label": "美妆个护",
+                                      "score": 0.28015224069704237
+                                  },
+                                  {
+                                      "label": "其他",
+                                      "score": 0.6194684983840593
+                                  }
+                              ])
     code: int = Field(..., description="返回信息")
 
 
