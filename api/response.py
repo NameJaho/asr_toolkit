@@ -45,6 +45,7 @@ class MainResponseData(BaseModel):
     #                                    })
     msg: str = Field(None,description="返回信息")
     asr_text: str = Field(None,description="asr结果")
+    video_id: str = Field(None,description="video_id")
     label: str = Field(..., description="美妆个护",
                        example='')
     predictions: list = Field(..., description="分类结果",

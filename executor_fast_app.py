@@ -5,7 +5,7 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 from numpy import float32
 from pydub import AudioSegment
 
-from api.request import MainRequest, ClsRequest
+from api.request import MainRequest, ClsRequest, BatchRequest
 from api.response import MainResponse, TargetCatResponseData, ClsResponse, MainResponseData, ClsResponseData
 from module.classify_api import classify
 from module.wav_detector import WavDetector
@@ -173,25 +173,47 @@ class Executor:
         return label, predictions
 
     def process(self, video_url, video_id, video_tag_list, title, content):
+        base_resp = {
+            "predictions": [],
+            "label": "",
+            "asr_text": "",
+            'msg': '',
+            'video_id': video_id,
+            'code': -1
+        }
         result = self.classify(content, title)
         if result == "分类失败":
-            return result
+            base_resp['msg'] = "分类失败"
+            return base_resp
         label, predictions = result
         if label not in self.target_category:
-            return "不在目标分类中"
+            base_resp['msg'] = "不在目标分类中"
+            base_resp['label'] = label
+            base_resp['predictions'] = predictions
+            return base_resp
 
         file_name = self.download(video_url, video_id)
         if not file_name:
+            base_resp['msg'] = "视频下载失败"
+            base_resp['label'] = label
+            base_resp['predictions'] = predictions
             return "视频下载失败"
 
         features = self.extract_features(file_name)
         if not features:
-            return "特征抽取失败"
+            base_resp['msg'] = "特征抽取失败"
+            base_resp['label'] = label
+            base_resp['predictions'] = predictions
+            return base_resp
 
         filter_result = self.filter(features)
 
         if 'Success' not in filter_result:
-            return filter_result
+
+            base_resp['msg'] = filter_result
+            base_resp['label'] = label
+            base_resp['predictions'] = predictions
+            return base_resp
 
         if features['db20_splits_size'] >= 0.08:
             features['music_detected'] = False
@@ -220,7 +242,11 @@ class Executor:
                     vocal_features = wav_detector.extract_features(vocal_path)
                 except Exception as e:
                     logger.error("wav_detector 失败: %s" % e)
-                    return "人声音频特征抽取失败"
+
+                    base_resp['msg'] = "人声音频特征抽取失败"
+                    base_resp['label'] = label
+                    base_resp['predictions'] = predictions
+                    return base_resp
 
                 features['vocal_db20_splits_size'] = vocal_features['db20_splits_size']
                 if vocal_features['db20_splits_size'] < 0.1:
@@ -229,7 +255,11 @@ class Executor:
                 else:
                     features['vocal_qualified'] = False
                     features['asr'] = False
-                    return "声谱特征排除(db20_splits_size >= 0.1)"
+
+                    base_resp['msg'] = "声谱特征排除(db20_splits_size >= 0.1)"
+                    base_resp['label'] = label
+                    base_resp['predictions'] = predictions
+                    return base_resp
         features['id'] = video_id
         features['title'] = title
         features['label'] = label
@@ -242,8 +272,13 @@ class Executor:
             "label": label,
             'asr_text': features['asr_text'],
         }
+
+        base_resp['msg'] = "success"
+        base_resp['label'] = label
+        base_resp['predictions'] = predictions
+        base_resp['asr_text'] = features['asr_text']
         # return self.format_feature(features)
-        return result
+        return base_resp
 
 
 executor = Executor()
@@ -260,22 +295,20 @@ def execute(request: MainRequest):
     # executor = Executor()
     features = executor.process(video_url, video_id, video_tag_list, title, content)
     logger.info(features)
-    if isinstance(features, str):
-        return get_response({
-            "code": -1,
-            "asr_text": "",
-            "label": "",
-            "predictions": [],
-            "msg": features,
-        })
-    else:
-        return get_response({
-            "asr_text": features['asr_text'],
-            "label": features['label'],
-            "predictions": features['predictions'],
-            'msg': 'success',
-            "code": 200,
-        })
+    return get_response(features)
+@app.post(path="/video/batch", response_model=MainResponseData, summary="批量处理视频")
+def batch(request: BatchRequest):
+    datas = request.data
+    # video_url = request.video_url
+    # video_id = request.video_id
+    # video_tag_list = request.video_tag_list
+    # title = request.title
+    # content = request.content
+    # logger.info(video_url)
+    # executor = Executor()
+    features = executor.process(video_url, video_id, video_tag_list, title, content)
+    logger.info(features)
+    return get_response(features)
 
 
 @app.post(path="/target_categories", response_model=TargetCatResponseData, summary="获取目标分类")

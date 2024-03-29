@@ -34,7 +34,7 @@ class WavDetector:
         total_length = self.get_duration()
         self.model = AutoModel(model=self.vad_model_path)
 
-        vocal_chunks = self.model.generate(input=self.audio_path )
+        vocal_chunks = self.model.generate(input=self.audio_path)
 
         vocal_duration = 0
         for vocal_chunk in vocal_chunks[0]['value']:
