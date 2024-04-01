@@ -30,8 +30,7 @@ class WavDetector:
         return duration
 
     @timer
-    def check_vocal(self):
-        total_length = self.get_duration()
+    def check_vocal(self, total_length):
         self.model = AutoModel(model=self.vad_model_path)
 
         vocal_chunks = self.model.generate(input=self.audio_path)
@@ -43,7 +42,7 @@ class WavDetector:
         gaps = vocal_chunks[0]['value'].__len__()
         vocal_pct = vocal_duration / (total_length * 1000)
 
-        self.features['gaps_per_sec'] = gaps / self.get_duration()
+        self.features['gaps_per_sec'] = gaps / total_length
         self.features['vocal_duration'] = vocal_duration
         self.features['vocal_pct'] = vocal_pct
 
@@ -77,20 +76,20 @@ class WavDetector:
         return self.features
 
     @timer
-    def extract_db20_splits(self):
+    def extract_db20_splits(self, duration):
         db20_splits = librosa.effects.split(y=self.y, frame_length=4000, top_db=20)
-        self.features['db20_splits_size'] = db20_splits.size / self.get_duration()
+        self.features['db20_splits_size'] = db20_splits.size / duration
         return self.features
 
     def extract_features(self, file_name):
         self.audio_path = file_name
         self.y, self.sr = librosa.load(self.audio_path)
 
-        self.get_duration()
-        self.extract_db20_splits()
+        duration = self.get_duration()
+        self.extract_db20_splits(duration)
         # self.extract_energy()
         # self.extract_rhythm()
-        self.check_vocal()
+        self.check_vocal(duration)
 
         return self.features
 

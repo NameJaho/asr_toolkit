@@ -1,13 +1,17 @@
+import json
 import re
+
+import pandas as pd
 import requests
 from fastapi import FastAPI
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from numpy import float32
 from pydub import AudioSegment
 
+from api.rds import get_redis
 from api.request import MainRequest, ClsRequest, BatchRequest
 from api.response import MainResponse, TargetCatResponseData, ClsResponse, MainResponseData, ClsResponseData
-from module.classify_api import classify
+from module.classify_api import classify, batch_classify
 from module.wav_detector import WavDetector
 from tools import audio_extractor
 from module.uvr5_model import VocalSeparator
@@ -40,12 +44,13 @@ def get_response(data: dict = None, code=200):
 class Executor:
     def __init__(self):
         self.vocal_separator = VocalSeparator()
-        self.asr_model = ASRModel()
-        self.vs = VocalSeparator()
-        self.wav_detector = WavDetector()
+        # self.asr_model = ASRModel()
+        # self.vs = VocalSeparator()
+        # self.wav_detector = WavDetector()
 
         self.target_category = ["宠物用品", "宠物食品", "零食", "母婴用品", "家具", "家居百货", "珠宝配饰", "日用百货",
                                 "食品饮料", "电器", "保健品", "科技数码", "美妆个护", "购物", ]
+        self.rds = get_redis()
 
     @staticmethod
     @timer
@@ -108,7 +113,7 @@ class Executor:
                 video_clip = VideoFileClip(file_name)
                 video_clip.audio.write_audiofile(file_name.rstrip('.mp4') + '.wav')
             except:
-                return False
+                return "下载失败"
         return file_name
 
     def extract_features(self, file_name):
@@ -159,18 +164,37 @@ class Executor:
         return data
 
     @staticmethod
-    def classify(content, title):
-        if len(content) > 100:
-            content = title + re.findall('.*?(#.*)', content)[0] if '#' in content else title
+    def classify(content1, title):
+        if len(content1) > 100:
+            content = title + re.findall('.*?(#.*)', content1)[0] if '#' in content1 else title
         else:
-            content = title + content
+            content = title + content1
         if content:
             content = re.sub('\?|❗|？', ',', content)
             content = re.sub('\[话题\]', ' ', content)
+        else:
+            content = content1
         label, predictions = classify(content)
         if not label and not predictions:
-            return "分类失败"
+            return "分类失败", "分类失败"
         return label, predictions
+
+    @staticmethod
+    def pre_classify(tasks):
+        ls = []
+
+        for title, content1 in tasks:
+            if len(content1) > 100:
+                content = title + re.findall('.*?(#.*)', content1)[0] if '#' in content1 else title
+            else:
+                content = title + content1
+            if content:
+                content = re.sub('\?|❗|？', ',', content)
+                content = re.sub('\[话题\]', ' ', content)
+            else:
+                content = content1
+            ls.append(content)
+        return ls
 
     def process(self, video_url, video_id, video_tag_list, title, content):
         base_resp = {
@@ -209,7 +233,6 @@ class Executor:
         filter_result = self.filter(features)
 
         if 'Success' not in filter_result:
-
             base_resp['msg'] = filter_result
             base_resp['label'] = label
             base_resp['predictions'] = predictions
@@ -280,6 +303,30 @@ class Executor:
         # return self.format_feature(features)
         return base_resp
 
+    @timer
+    def batch_classify(self, datas):
+        df = pd.DataFrame(datas)
+        base_resp = {
+            "predictions": [],
+            "label": "",
+            "asr_text": "",
+            'msg': '',
+            'video_id': "",
+            'code': -1
+        }
+        tasks = self.pre_classify(
+            [[i['title'], i['content']] for i in df[['title', 'content']].to_dict(orient='records')])
+        label_result = batch_classify(tasks)
+        df['predictions'] = [item['predictions'] for item in label_result]
+        df['label'] = [item['label'] for item in label_result]
+        df['target'] = df['label'].apply(lambda x: "不在目标分类中" if x not in self.target_category else "")
+        target = df[df['target'] == ''][['video_id', 'label', 'predictions','video_url']]
+        self.save_to_redis('classify_queue', target.to_dict(orient='records'))
+        return f'classify_queue 新增{target.__len__()}条数据'
+
+    def save_to_redis(self, name, values):
+        [self.rds.lpush(name, json.dumps(i,ensure_ascii=False)) for i in values]
+
 
 executor = Executor()
 
@@ -296,19 +343,14 @@ def execute(request: MainRequest):
     features = executor.process(video_url, video_id, video_tag_list, title, content)
     logger.info(features)
     return get_response(features)
-@app.post(path="/video/batch", response_model=MainResponseData, summary="批量处理视频")
+
+
+@app.post(path="/batch",   summary="批量处理视频1")
 def batch(request: BatchRequest):
     datas = request.data
-    # video_url = request.video_url
-    # video_id = request.video_id
-    # video_tag_list = request.video_tag_list
-    # title = request.title
-    # content = request.content
-    # logger.info(video_url)
-    # executor = Executor()
-    features = executor.process(video_url, video_id, video_tag_list, title, content)
-    logger.info(features)
-    return get_response(features)
+    msg = executor.batch_classify(datas)
+    logger.info(msg)
+    return msg
 
 
 @app.post(path="/target_categories", response_model=TargetCatResponseData, summary="获取目标分类")
@@ -341,4 +383,18 @@ if __name__ == "__main__":
 
     uvicorn.run("executor_fast_app:app", host="0.0.0.0", port=8899, reload=True)
     # uvicorn.run(app, host="0.0.0.0", port=7879)
-# curl -X POST -H "Content-Type: application/json" -d '{"video_url": "guoc_test_00006afed434d4eb95af94b1ef03dac2"}' http://127.0.0.1:23002/video/parse
+
+# 1000条数据 3s-4s
+# 1. 批量（1000条）传入content,title调用接口分类，返回符合条件的视频id等信息 进入classify_queue(video_id,label,predictions) 失败进入 result_queue (video_id,label,predictions,msg)
+
+# 多线程下载
+# 2. classify_queue:下载符合条件的视频，转音频 根据音频绝对时长、db20_splits_size 进行初步筛选  classify_queue(video_id,label,predictions) 失败进入 result_queue (video_id,label,predictions,msg)
+# db20_splits_size小于0.08进入extract_features_queue 大于进入 asr_queue
+
+# 单线程处理
+# 3. extract_features_queue: check_vocal，筛选音频时长、人声占比、人声时长等  成功进入asr_queue(video_id,label,predictions)  失败进入 result_queue (video_id,label,predictions,msg)
+
+# 可多线程处理
+# 4. asr_queue:进行asr识别  结果存入 result_queue (video_id,label,predictions,msg)
+
+# 5. pop result_queue to mysql

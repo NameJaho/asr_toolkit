@@ -1,4 +1,5 @@
 from funasr import AutoModel
+from loguru import logger
 
 # voice recognition model
 ASR_MODEL_NAME = "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
@@ -10,7 +11,7 @@ PUNC_MODEL_NAME = "damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch"
 
 class ASRModel:
     def __init__(self):
-        pass
+        self.model = self.get_model()
 
     @staticmethod
     def get_model():
@@ -19,6 +20,7 @@ class ASRModel:
             model=ASR_MODEL_NAME, model_revision="v2.0.4",
             vad_model=VAD_MODEL_NAME, vad_model_revision="v2.0.4",
             punc_model=PUNC_MODEL_NAME, punc_model_revision="v2.0.4",
+            device='cuda:0'
             # spk_model="cam++", spk_model_revision="v2.0.2",
         )
 
@@ -29,10 +31,16 @@ class ASRModel:
 
     # inference param: batch_size_token = 5000, batch_size_token_threshold_s = 40, max_single_segment_time = 6000
     def inference(self, audio_input):
-        model = self.get_model()
+        # model = self.get_model()
         # result = model.generate(audio_input)[0]['text']
 
-        result = model.generate(input=audio_input, batch_size=64)
+        result = self.model.generate(input=audio_input, batch_size=64)
+        logger.info(f"{audio_input}  ASR result: {result}")
+        if result:
+            result = result[0]['text']
+        else:
+            logger.error("ASR result is None")
+            result = ''
         return result
 
 
