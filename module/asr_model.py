@@ -20,7 +20,6 @@ class ASRModel:
             model=ASR_MODEL_NAME, model_revision="v2.0.4",
             vad_model=VAD_MODEL_NAME, vad_model_revision="v2.0.4",
             punc_model=PUNC_MODEL_NAME, punc_model_revision="v2.0.4",
-            device='cuda:0'
             # spk_model="cam++", spk_model_revision="v2.0.2",
         )
 
