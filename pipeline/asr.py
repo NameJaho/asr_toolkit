@@ -46,4 +46,4 @@ if __name__ == '__main__':
     # duration = librosa.get_duration(y=y, sr=sr)
     # print(duration)
     # asr()
-    start_downloader_threads(n_threads=4)
+    start_downloader_threads(n_threads=2)
