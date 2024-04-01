@@ -46,7 +46,7 @@ class Executor:
         self.vocal_separator = VocalSeparator()
         # self.asr_model = ASRModel()
         # self.vs = VocalSeparator()
-        # self.wav_detector = WavDetector()
+        self.wav_detector = WavDetector()
 
         self.target_category = ["宠物用品", "宠物食品", "零食", "母婴用品", "家具", "家居百货", "珠宝配饰", "日用百货",
                                 "食品饮料", "电器", "保健品", "科技数码", "美妆个护", "购物", ]
