@@ -31,19 +31,9 @@ def asr():
         rpush(rds, 'result_queue', datas)
 
 
-def start_downloader_threads(n_threads=2):
-    threads = []
-    for _ in range(n_threads):
-        thread = Thread(target=asr)
-        threads.append(thread)
-        thread.start()
-
-    for thread in threads:
-        thread.join()
 
 if __name__ == '__main__':
     # y, sr = librosa.load('/Users/jaho/Jaho/Job/asr_toolkit/pipeline/videos/592f8cbcb46c5d7bc8495c03.mp4')
     # duration = librosa.get_duration(y=y, sr=sr)
     # print(duration)
-    # asr()
-    start_downloader_threads(n_threads=2)
+    asr()
