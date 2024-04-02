@@ -6,6 +6,7 @@ import requests
 from loguru import logger
 
 from api.db import MySQL, get_redis
+from tools.utils import get_root_path
 
 
 def saving():
@@ -26,8 +27,9 @@ def saving():
             success_cnt += 1
         chunk.append(datas)
         # delete video file by video_id
-        os.system(f"rm -rf videos/{datas['video_id']}.mp4")
-        os.system(f"rm -rf videos/{datas['video_id']}.wav")
+        root_path = get_root_path()
+        os.system(f"rm -rf {root_path}/videos/{datas['video_id']}.mp4")
+        os.system(f"rm -rf {root_path}/videos/{datas['video_id']}.wav")
         logger.info(f"delete videos/{datas['video_id']}")
         if len(chunk) < 1000 or time.time() - start < 300:
             continue
