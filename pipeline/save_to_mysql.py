@@ -20,7 +20,7 @@ def saving():
         datas = json.loads(video_data)
         datas['update_time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         chunk.append(datas)
-        if len(chunk) < 1000 or time.time() - start < 600:
+        if len(chunk) < 1000 or time.time() - start < 300:
             continue
         else:
             mysql.save(chunk)
