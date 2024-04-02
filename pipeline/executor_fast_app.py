@@ -13,6 +13,7 @@ from api.request import MainRequest, ClsRequest, BatchRequest, GetDataRequest
 from api.response import TargetCatResponseData, MainResponseData, ClsResponseData
 from module.classify_api import classify, batch_classify
 from module.wav_detector import WavDetector
+from pipeline.save_to_mysql import send
 from tools import audio_extractor
 from module.uvr5_model import VocalSeparator
 from tools.utils import *
@@ -320,6 +321,7 @@ class Executor:
         no_target['msg'] = '不在目标分类中'
         self.save_to_redis('classify_queue', target.to_dict(orient='records'))
         self.save_to_redis('result_queue', no_target.to_dict(orient='records'))
+        send(f'classify_queue 新增{target.__len__()}条数据 result_queue 新增{no_target.__len__()}条数据')
         return f'classify_queue 新增{target.__len__()}条数据 result_queue 新增{no_target.__len__()}条数据'
 
     def save_to_redis(self, name, values):
