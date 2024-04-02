@@ -88,7 +88,7 @@ def start_downloader_threads(n_threads=2):
 if __name__ == '__main__':
     # 设置命令行参数
     parser = argparse.ArgumentParser(description='从Redis队列下载视频的多线程脚本。')
-    parser.add_argument('-t', '--threads', type=int, default=4, help='启动的线程数，默认为4。')
+    parser.add_argument('-t', '--threads', type=int, default=8, help='启动的线程数，默认为4。')
     args = parser.parse_args()
 
     start_downloader_threads(args.threads)
