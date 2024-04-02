@@ -34,7 +34,7 @@ class ASRModel:
         # model = self.get_model()
         # result = model.generate(audio_input)[0]['text']
 
-        result = self.model.generate(input=audio_input, batch_size=64)
+        result = self.model.generate(input=audio_input, batch_size=32)
         logger.info(f"{audio_input}  ASR result: {result}")
         if result:
             result = result[0]['text']
