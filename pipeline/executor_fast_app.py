@@ -317,6 +317,7 @@ class Executor:
         df['target'] = df['label'].apply(lambda x: "不在目标分类中" if x not in self.target_category else "")
         target = df[df['target'] == ''][['video_id', 'label', 'predictions', 'video_url']]
         no_target = df[df['target'] != ''][['video_id', 'label', 'predictions', 'video_url']]
+        no_target['msg'] = '不在目标分类中'
         self.save_to_redis('classify_queue', target.to_dict(orient='records'))
         self.save_to_redis('result_queue', no_target.to_dict(orient='records'))
         return f'classify_queue 新增{target.__len__()}条数据 result_queue 新增{no_target.__len__()}条数据'
