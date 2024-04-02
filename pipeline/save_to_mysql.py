@@ -32,6 +32,7 @@ def saving():
             mysql.save(chunk)
             chunk.clear()
             start = time.time()
+            success_cnt = 0
 
 
 def send(message):
