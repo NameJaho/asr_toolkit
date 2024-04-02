@@ -52,7 +52,10 @@ class MySQL(object):
     def save(self, ls):
         df = pd.DataFrame(ls)
         print(ls)
-        df.drop(columns=['file_name'], inplace=True)
+        if 'video_url' in df.columns:
+            df.drop(columns=['video_url'], inplace=True)
+        if 'file_name' in df.columns:
+            df.drop(columns=['file_name'], inplace=True)
         df['predictions'] = df['predictions'].apply(lambda x: json.dumps(x, ensure_ascii=False))
         df.to_sql(name='asr', con=self.engine, if_exists='append', index=False)
 
