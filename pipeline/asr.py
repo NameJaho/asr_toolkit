@@ -5,7 +5,7 @@ from threading import Thread
 
 import librosa
 
-from api.rds import get_redis, rpush
+from api.db import get_redis, rpush
 from module.asr_model import ASRModel
 
 rds = get_redis()
