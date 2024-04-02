@@ -8,9 +8,9 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 from numpy import float32
 from pydub import AudioSegment
 
-from api.db import get_redis
-from api.request import MainRequest, ClsRequest, BatchRequest
-from api.response import  TargetCatResponseData, MainResponseData, ClsResponseData
+from api.db import get_redis, MySQL
+from api.request import MainRequest, ClsRequest, BatchRequest, GetDataRequest
+from api.response import TargetCatResponseData, MainResponseData, ClsResponseData
 from module.classify_api import classify, batch_classify
 from module.wav_detector import WavDetector
 from tools import audio_extractor
@@ -20,14 +20,12 @@ from loguru import logger
 from tools.utils import timer
 import os
 
-
 INPUT_VIDEOS_FOLDER = 'data'
 OUTPUT_AUDIOS_FOLDER = 'output/audios'
 OUTPUT_TEXTS_FOLDER = 'output/texts'
 
 app = FastAPI(title='Asr System', version='1.0.0',
               )
-
 
 
 def get_response(data: dict = None, code=200):
@@ -347,6 +345,14 @@ def batch(request: BatchRequest):
     msg = executor.batch_classify(datas)
     logger.info(msg)
     return msg
+
+
+@app.post(path="/get_datas", summary="获取数据")
+def get_data(request: GetDataRequest):
+    update_time = request.update_time
+    mysql = MySQL()
+    datas = mysql.get_data(update_time)
+    return datas
 
 
 @app.post(path="/target_categories", response_model=TargetCatResponseData, summary="获取目标分类")

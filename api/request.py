@@ -7039,3 +7039,7 @@ class ClsRequest(BaseModel):
     title: str = Field(..., description="视频标题", example="这个蜜桃味唇油可爱到我心里了 有被惊喜到")
     content: str = Field(..., description="视频文字内容",
                          example="唇油;唇蜜;变色唇膏;水光唇釉;美妆好物;apieu;apieu唇油")
+
+
+class GetDataRequest(BaseModel):
+    update_time: str = Field(None, description="大于该时间的数据，不传全量", example="2024-04-02 11:27:26")
