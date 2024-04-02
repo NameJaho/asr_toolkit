@@ -1,5 +1,6 @@
 import json
 import time
+import requests
 
 from loguru import logger
 
@@ -23,10 +24,22 @@ def saving():
         if len(chunk) < 1000 or time.time() - start < 300:
             continue
         else:
+            logger.info(f"save {chunk.__len__()} datas to mysql")
+            send(f"save {chunk.__len__()} datas to mysql")
             mysql.save(chunk)
             chunk.clear()
-            logger.info(f"save data to mysql")
             start = time.time()
+
+
+def send(message):
+    # aite的相关人手机号
+    mentioned_mobile_list = [15088132627, 18538775625]
+    qun_id = '2bc81e07-3ed6-4ccc-8cd0-81a601f1aca6'
+    request = {"url": 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={}'.format(qun_id),
+               "headers": {"Content-Type": "application/json"},
+               "json": {"msgtype": "text", "text": {"content": message, "mentioned_mobile_list": mentioned_mobile_list}}
+               }
+    rs = requests.post(**request)
 
 
 if __name__ == '__main__':
