@@ -8,20 +8,18 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 from numpy import float32
 from pydub import AudioSegment
 
-from api.rds import get_redis
+from api.db import get_redis
 from api.request import MainRequest, ClsRequest, BatchRequest
-from api.response import MainResponse, TargetCatResponseData, ClsResponse, MainResponseData, ClsResponseData
+from api.response import  TargetCatResponseData, MainResponseData, ClsResponseData
 from module.classify_api import classify, batch_classify
 from module.wav_detector import WavDetector
 from tools import audio_extractor
 from module.uvr5_model import VocalSeparator
-from module.asr_model import ASRModel
 from tools.utils import *
 from loguru import logger
 from tools.utils import timer
 import os
 
-# app = Flask(__name__)
 
 INPUT_VIDEOS_FOLDER = 'data'
 OUTPUT_AUDIOS_FOLDER = 'output/audios'
@@ -30,8 +28,6 @@ OUTPUT_TEXTS_FOLDER = 'output/texts'
 app = FastAPI(title='Asr System', version='1.0.0',
               )
 
-
-# app.add_exception_handler(CategoryError, category_error_handler)
 
 
 def get_response(data: dict = None, code=200):
@@ -320,12 +316,12 @@ class Executor:
         df['predictions'] = [item['predictions'] for item in label_result]
         df['label'] = [item['label'] for item in label_result]
         df['target'] = df['label'].apply(lambda x: "不在目标分类中" if x not in self.target_category else "")
-        target = df[df['target'] == ''][['video_id', 'label', 'predictions','video_url']]
+        target = df[df['target'] == ''][['video_id', 'label', 'predictions', 'video_url']]
         self.save_to_redis('classify_queue', target.to_dict(orient='records'))
         return f'classify_queue 新增{target.__len__()}条数据'
 
     def save_to_redis(self, name, values):
-        [self.rds.lpush(name, json.dumps(i,ensure_ascii=False)) for i in values]
+        [self.rds.lpush(name, json.dumps(i, ensure_ascii=False)) for i in values]
 
 
 executor = Executor()
@@ -345,7 +341,7 @@ def execute(request: MainRequest):
     return get_response(features)
 
 
-@app.post(path="/batch",   summary="批量处理视频1")
+@app.post(path="/batch", summary="批量处理视频1")
 def batch(request: BatchRequest):
     datas = request.data
     msg = executor.batch_classify(datas)

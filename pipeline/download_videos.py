@@ -12,7 +12,7 @@ import requests
 from threading import Thread
 from moviepy.editor import VideoFileClip
 
-from api.rds import get_redis, rpush
+from api.db import get_redis, rpush
 
 # 连接到Redis
 rds = get_redis()
