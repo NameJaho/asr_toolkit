@@ -40,7 +40,7 @@ def send(message):
     qun_id = '2bc81e07-3ed6-4ccc-8cd0-81a601f1aca6'
     request = {"url": 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={}'.format(qun_id),
                "headers": {"Content-Type": "application/json"},
-               "json": {"msgtype": "text", "text": {"content": message, "mentioned_mobile_list": mentioned_mobile_list}}
+               "json": {"msgtype": "text", "text": {"content": message}}
                }
     rs = requests.post(**request)
 
