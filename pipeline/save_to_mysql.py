@@ -1,4 +1,5 @@
 import json
+import os
 import time
 import requests
 
@@ -24,6 +25,9 @@ def saving():
         if datas.get('msg') == 'success':
             success_cnt += 1
         chunk.append(datas)
+        # delete video file by video_id
+        os.system(f"rm -rf videos/{datas['video_id']}.mp4")
+        os.system(f"rm -rf videos/{datas['video_id']}.wav")
         if len(chunk) < 1000 or time.time() - start < 300:
             continue
         else:

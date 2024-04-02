@@ -57,7 +57,14 @@ class MySQL(object):
         if 'file_name' in df.columns:
             df.drop(columns=['file_name'], inplace=True)
         df['predictions'] = df['predictions'].apply(lambda x: json.dumps(x, ensure_ascii=False))
-        df.to_sql(name='asr', con=self.engine, if_exists='append', index=False)
+        for _ in range(3):
+            try:
+                df.to_sql(name='asr', con=self.engine, if_exists='append', index=False)
+                break
+            except Exception as e:
+                logger.error(f"save to mysql error: {e}")
+                self.engine = self.get_connection()
+        # df.to_sql(name='asr', con=self.engine, if_exists='append', index=False)
 
     def get_data(self, start_time,end_time):
         if not start_time:
