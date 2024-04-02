@@ -42,7 +42,7 @@ class Executor:
         # self.vs = VocalSeparator()
         self.wav_detector = WavDetector()
 
-        self.target_category = ["宠物用品", "宠物食品", "零食", "母婴用品", "家具", "家居百货", "珠宝配饰", "日用百货",
+        self.target_category = ["餐饮","时尚穿搭","宠物用品", "宠物食品", "零食", "母婴用品", "家具", "家居百货", "珠宝配饰", "日用百货",
                                 "食品饮料", "电器", "保健品", "科技数码", "美妆个护", "购物", ]
         self.rds = get_redis()
 
@@ -311,12 +311,15 @@ class Executor:
         tasks = self.pre_classify(
             [[i['title'], i['content']] for i in df[['title', 'content']].to_dict(orient='records')])
         label_result = batch_classify(tasks)
+        print(label_result)
         df['predictions'] = [item['predictions'] for item in label_result]
         df['label'] = [item['label'] for item in label_result]
         df['target'] = df['label'].apply(lambda x: "不在目标分类中" if x not in self.target_category else "")
         target = df[df['target'] == ''][['video_id', 'label', 'predictions', 'video_url']]
+        no_target = df[df['target'] != ''][['video_id', 'label', 'predictions', 'video_url']]
         self.save_to_redis('classify_queue', target.to_dict(orient='records'))
-        return f'classify_queue 新增{target.__len__()}条数据'
+        self.save_to_redis('result_queue', no_target.to_dict(orient='records'))
+        return f'classify_queue 新增{target.__len__()}条数据 result_queue 新增{no_target.__len__()}条数据'
 
     def save_to_redis(self, name, values):
         [self.rds.lpush(name, json.dumps(i, ensure_ascii=False)) for i in values]
