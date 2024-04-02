@@ -14,7 +14,7 @@ def saving():
         # 从Redis队列中获取视频URL和ID
         video_data = rds.lpop('result_queue')
         if not video_data:
-            time.sleep(1)
+            time.sleep(0.1)
             continue
         datas = json.loads(video_data)
         datas['update_time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())

@@ -3,7 +3,7 @@ import time
 
 from loguru import logger
 
-from api.rds import get_redis, rpush
+from api.db import get_redis, rpush
 from module.uvr5_model import VocalSeparator
 from module.wav_detector import WavDetector
 from pipeline.executor_fast_app import Executor
