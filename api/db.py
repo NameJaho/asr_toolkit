@@ -51,7 +51,7 @@ class MySQL(object):
 
     def save(self, ls):
         df = pd.DataFrame(ls)
-        print(ls)
+        # print(ls)
         if 'video_url' in df.columns:
             df.drop(columns=['video_url'], inplace=True)
         if 'file_name' in df.columns:
