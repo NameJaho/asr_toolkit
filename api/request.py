@@ -7042,4 +7042,5 @@ class ClsRequest(BaseModel):
 
 
 class GetDataRequest(BaseModel):
-    start_time: str = Field(None, description="大于该时间的数据，不传全量", example="2024-04-02 11:27:26")
+    start_time: str = Field(None, description="开始时间", example="2024-04-02 11:27:26")
+    end_time: str = Field(None, description="结束时间", example="2024-04-02 11:27:26")
