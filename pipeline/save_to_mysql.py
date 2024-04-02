@@ -28,6 +28,7 @@ def saving():
         # delete video file by video_id
         os.system(f"rm -rf videos/{datas['video_id']}.mp4")
         os.system(f"rm -rf videos/{datas['video_id']}.wav")
+        logger.info(f"delete videos/{datas['video_id']}")
         if len(chunk) < 1000 or time.time() - start < 300:
             continue
         else:
