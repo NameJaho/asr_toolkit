@@ -349,9 +349,10 @@ def batch(request: BatchRequest):
 
 @app.post(path="/get_datas", summary="获取数据")
 def get_data(request: GetDataRequest):
-    update_time = request.update_time
+    start_time = request.start_time
+    end_time = request.end_time
     mysql = MySQL()
-    datas = mysql.get_data(update_time)
+    datas = mysql.get_data(start_time, end_time)
     return datas
 
 

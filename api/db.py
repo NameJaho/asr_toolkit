@@ -59,11 +59,11 @@ class MySQL(object):
         df['predictions'] = df['predictions'].apply(lambda x: json.dumps(x, ensure_ascii=False))
         df.to_sql(name='asr', con=self.engine, if_exists='append', index=False)
 
-    def get_data(self, update_time):
-        if not update_time:
+    def get_data(self, start_time,end_time):
+        if not start_time:
             sql = "select * from asr order by update_time desc"
         else:
-            sql = f"select * from asr where update_time>'{update_time}' order by update_time desc"
+            sql = f"select * from asr where update_time>='{start_time}' and update_time <'{end_time}' order by update_time desc"
         df = pd.read_sql_query(sql, self.engine)
         df['update_time'] = df['update_time'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
         dict_result = df.to_dict(orient='records')
