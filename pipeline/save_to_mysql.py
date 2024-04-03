@@ -30,6 +30,8 @@ def saving():
         root_path = get_root_path()
         os.system(f"rm -rf {root_path}/videos/{datas['video_id']}.mp4")
         os.system(f"rm -rf {root_path}/videos/{datas['video_id']}.wav")
+        time.sleep(0.5)
+
         logger.info(f"delete {root_path}/videos/{datas['video_id']}")
         if len(chunk) < 1000 or time.time() - start < 300:
             continue
