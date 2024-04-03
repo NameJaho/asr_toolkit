@@ -21,7 +21,13 @@ def asr():
             continue
         datas = json.loads(datas)
         file_name = datas['file_name']
-        asr_text = asr_model.inference(file_name)
+        for _ in range(3):
+            try:
+                asr_text = asr_model.inference(file_name)
+                break
+            except Exception as e:
+                asr_text = None
+                time.sleep(1)
         if not asr_text:
             datas['msg'] = "ASR result is None"
         else:
