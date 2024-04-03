@@ -27,21 +27,37 @@ def saving():
             success_cnt += 1
         chunk.append(datas)
         # delete video file by video_id
-        root_path = get_root_path()
-        os.system(f"rm -rf {root_path}/videos/{datas['video_id']}.mp4")
-        os.system(f"rm -rf {root_path}/videos/{datas['video_id']}.wav")
-        time.sleep(0.5)
+        # os.system(f"rm -rf {root_path}/videos/{datas['video_id']}.mp4")
+        # os.system(f"rm -rf {root_path}/videos/{datas['video_id']}.wav")
+        # time.sleep(0.5)
 
-        logger.info(f"delete {root_path}/videos/{datas['video_id']}")
+        # logger.info(f"delete {root_path}/videos/{datas['video_id']}")
         if len(chunk) < 1000 or time.time() - start < 300:
             continue
         else:
             logger.info(f"save {chunk.__len__()} datas to mysql")
             send(f"save {chunk.__len__()} datas to mysql success_cnt: {success_cnt}")
             mysql.save(chunk)
+            delete_videos(chunk)
             chunk.clear()
             start = time.time()
             success_cnt = 0
+
+
+def delete_videos(chunk):
+    root_path = get_root_path()
+
+    for item in chunk:
+        filename = f"{root_path}/videos/{item['video_id']}.mp4"
+        # 判断文件是否存在
+        if os.path.exists(filename):
+            # 如果文件存在，删除文件
+            os.remove(filename)
+            time.sleep(0.1)
+            os.remove(filename.replace('mp4', 'wav'))
+            logger.info(f"文件 '{filename}' 已删除")
+        else:
+            logger.info(f"文件 '{filename}' 不存在")
 
 
 def send(message):
