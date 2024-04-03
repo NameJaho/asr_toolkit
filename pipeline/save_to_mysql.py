@@ -32,7 +32,7 @@ def saving():
         # time.sleep(0.5)
 
         # logger.info(f"delete {root_path}/videos/{datas['video_id']}")
-        if len(chunk) < 1000 or time.time() - start < 300:
+        if len(chunk) < 1000 and time.time() - start < 300:
             continue
         else:
             logger.info(f"save {chunk.__len__()} datas to mysql")
