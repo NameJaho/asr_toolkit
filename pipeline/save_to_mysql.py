@@ -54,7 +54,8 @@ def delete_videos(chunk):
             # 如果文件存在，删除文件
             os.remove(filename)
             time.sleep(0.1)
-            os.remove(filename.replace('mp4', 'wav'))
+            if os.path.exists(filename.replace('mp4', 'wav')):
+                os.remove(filename.replace('mp4', 'wav'))
             logger.info(f"文件 '{filename}' 已删除")
         else:
             logger.info(f"文件 '{filename}' 不存在")
