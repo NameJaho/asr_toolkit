@@ -26,10 +26,12 @@ def asr():
                 asr_text = asr_model.inference(file_name)
                 break
             except Exception as e:
-                asr_text = None
+                asr_text = f"asr error:{str(e)}"
                 time.sleep(1)
         if not asr_text:
             datas['msg'] = "ASR result is None"
+        elif 'error' in asr_text:
+            datas['msg'] = asr_text
         else:
             datas['msg'] = 'success'
             datas['asr_text'] = asr_text
