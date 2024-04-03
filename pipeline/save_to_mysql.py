@@ -54,8 +54,4 @@ def send(message):
 
 
 if __name__ == '__main__':
-    # saving()
-    root_path = get_root_path()
-
-    os.system(f"rm -rf {root_path}/videos/6602f5cc0000000012020f4e.mp4")
-    os.system(f"rm -rf {root_path}/videos/6602f5cc0000000012020f4e.wav")
+    saving()
