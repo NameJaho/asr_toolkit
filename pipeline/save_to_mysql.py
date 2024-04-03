@@ -54,12 +54,12 @@ def delete_videos(chunk):
             # 如果文件存在，删除文件
             os.remove(filename)
             time.sleep(0.1)
-            if os.path.exists(filename.replace('wav', 'mp4')):
-                os.remove(filename.replace('wav', 'mp4'))
             logger.info(f"文件 '{filename}' 已删除")
         else:
             logger.info(f"文件 '{filename}' 不存在")
 
+        if os.path.exists(filename.replace('wav', 'mp4')):
+            os.remove(filename.replace('wav', 'mp4'))
 
 def send(message):
     # aite的相关人手机号
