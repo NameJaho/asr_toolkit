@@ -48,7 +48,7 @@ def delete_videos(chunk):
     root_path = get_root_path()
 
     for item in chunk:
-        filename = f"{root_path}/videos/{item['video_id']}.mp4"
+        filename = f"{root_path}/videos/{item['video_id']}.wav"
         # 判断文件是否存在
         if os.path.exists(filename):
             # 如果文件存在，删除文件
