@@ -69,7 +69,13 @@ def send(message):
                "headers": {"Content-Type": "application/json"},
                "json": {"msgtype": "text", "text": {"content": message}}
                }
-    rs = requests.post(**request)
+    for _ in range(3):
+        try:
+            res = requests.post(**request)
+            if res.status_code == 200:
+                break
+        except Exception as e:
+            logger.error(f"send message error: {e}")
 
 
 if __name__ == '__main__':
