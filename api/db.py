@@ -4,7 +4,6 @@ import redis
 from loguru import logger
 
 from tools.utils import get_root_path
-import os
 import pandas as pd
 from sqlalchemy import create_engine
 import configparser
@@ -66,7 +65,7 @@ class MySQL(object):
                 self.engine = self.get_connection()
         # df.to_sql(name='asr', con=self.engine, if_exists='append', index=False)
 
-    def get_data(self, start_time,end_time):
+    def get_data(self, start_time, end_time):
         if not start_time:
             sql = "select * from asr order by update_time desc"
         else:

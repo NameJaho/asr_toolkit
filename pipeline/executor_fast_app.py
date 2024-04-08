@@ -311,6 +311,7 @@ class Executor:
         }
         tasks = self.pre_classify(
             [[i['title'], i['content']] for i in df[['title', 'content']].to_dict(orient='records')])
+        task_label = datas[0]['ds']
         label_result = batch_classify(tasks)
         print(label_result)
         df['predictions'] = [item['predictions'] for item in label_result]
@@ -318,10 +319,12 @@ class Executor:
         df['target'] = df['label'].apply(lambda x: "不在目标分类中" if x not in self.target_category else "")
         target = df[df['target'] == ''][['video_id', 'label', 'predictions', 'video_url']]
         no_target = df[df['target'] != ''][['video_id', 'label', 'predictions', 'video_url']]
+        target['ds'] = task_label
+        no_target['ds'] = task_label
         no_target['msg'] = '不在目标分类中'
         self.save_to_redis('classify_queue', target.to_dict(orient='records'))
         self.save_to_redis('result_queue', no_target.to_dict(orient='records'))
-        send(f'classify_queue 新增{target.__len__()}条数据 result_queue 新增{no_target.__len__()}条数据')
+        send(f'[{task_label}] : classify_queue 新增{target.__len__()}条数据 result_queue 新增{no_target.__len__()}条数据')
         return f'classify_queue 新增{target.__len__()}条数据 result_queue 新增{no_target.__len__()}条数据'
 
     def save_to_redis(self, name, values):
@@ -390,7 +393,7 @@ def classify_(request: ClsRequest):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("executor_fast_app:app", host="0.0.0.0", port=8899, reload=True)
+    uvicorn.run("executor_fast_app:app", host="0.0.0.0", port=8891, reload=True)
     # uvicorn.run(app, host="0.0.0.0", port=7879)
 
 # 1000条数据 3s-4s

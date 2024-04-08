@@ -23,6 +23,11 @@ if not os.path.exists(dirname):
 
 
 def download_video_from_redis():
+    # host = get_host()
+    # asr 部分还是保留在paddle上面跑 如果paddle找不到 再下载
+    asr_queue = f'asr_queue'
+    check_vocal_queue = f'check_vocal'
+    result_queue = f'result_queue'  # _{host}
     while True:
         # 从Redis队列中获取视频URL和ID
         video_data = rds.lpop('classify_queue')
@@ -50,28 +55,28 @@ def download_video_from_redis():
                     duration = librosa.get_duration(y=y, sr=sr)
                     if duration < 60:
                         datas['msg'] = "绝对时长小于60s"
-                        rpush(rds, 'result_queue', datas)
+                        rpush(rds, result_queue, datas)
                         continue
 
                     db20_splits = librosa.effects.split(y=y, frame_length=4000, top_db=20)
                     db20_splits_size = db20_splits.size / duration
                     if db20_splits_size >= 0.08:
-                        rpush(rds, 'asr_queue', datas)
+                        rpush(rds, asr_queue, datas)
                         continue
 
-                    rpush(rds, 'check_vocal_queue', datas)
+                    rpush(rds, check_vocal_queue, datas)
                 except Exception as e:
                     logger.info(f"转换音频失败: {e}")
                     # 转换失败，也视为整个过程失败
                     datas['msg'] = f'转换音频失败'
-                    rpush(rds, 'result_queue', datas)
+                    rpush(rds, result_queue, datas)
             else:
                 raise Exception("非200响应码")
         except Exception as e:
             logger.info(f"下载失败: {e}")
             # 下载失败，将错误信息推送到result_queue
             datas['msg'] = f'下载失败: {e}'
-            rpush(rds, 'result_queue', datas)
+            rpush(rds, result_queue, datas)
 
 
 def start_downloader_threads(n_threads=2):
